@@ -72,7 +72,8 @@ import 'l10n_zh.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -80,7 +81,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -92,12 +94,13 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -113,7 +116,7 @@ abstract class AppLocalizations {
     Locale('tr'),
     Locale('uk'),
     Locale('zh'),
-    Locale('zh', 'TW')
+    Locale('zh', 'TW'),
   ];
 
   /// No description provided for @aboutThanks.
@@ -185,7 +188,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupTip.
   ///
   /// In en, this message translates to:
-  /// **'The exported data is weakly encrypted. \nPlease keep it safe.'**
+  /// **'The exported data can be encrypted with password. \nPlease keep it safe.'**
   String get backupTip;
 
   /// No description provided for @backupVersionNotMatch.
@@ -193,6 +196,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Backup version is not match.'**
   String get backupVersionNotMatch;
+
+  /// No description provided for @backupPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password'**
+  String get backupPassword;
+
+  /// No description provided for @backupPasswordTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a password to encrypt backup files. Leave empty to disable encryption.'**
+  String get backupPasswordTip;
+
+  /// No description provided for @backupPasswordWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect backup password'**
+  String get backupPasswordWrong;
+
+  /// No description provided for @backupEncrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup is encrypted'**
+  String get backupEncrypted;
+
+  /// No description provided for @backupNotEncrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup is not encrypted'**
+  String get backupNotEncrypted;
+
+  /// No description provided for @backupPasswordSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password set'**
+  String get backupPasswordSet;
+
+  /// No description provided for @backupPasswordRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password removed'**
+  String get backupPasswordRemoved;
 
   /// No description provided for @battery.
   ///
@@ -211,6 +256,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This switch only means the program will try to run in the background. Whether it can run in the background depends on whether the permission is enabled or not. For AOSP-based Android ROMs, please disable \"Battery Optimization\" in this app. For MIUI / HyperOS, please change the power saving policy to \"Unlimited\".'**
   String get bgRunTip;
+
+  /// No description provided for @closeAfterSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and close'**
+  String get closeAfterSave;
 
   /// No description provided for @cmd.
   ///
@@ -302,6 +353,12 @@ abstract class AppLocalizations {
   /// **'Batch delete servers'**
   String get deleteServers;
 
+  /// No description provided for @desktopTerminalTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Command used to open the terminal emulator when launching SSH sessions.'**
+  String get desktopTerminalTip;
+
   /// No description provided for @dirEmpty.
   ///
   /// In en, this message translates to:
@@ -319,6 +376,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Disk'**
   String get disk;
+
+  /// No description provided for @diskHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Disk Health'**
+  String get diskHealth;
 
   /// No description provided for @diskIgnorePath.
   ///
@@ -360,7 +423,10 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{runningCount} running, {stoppedCount} container stopped.'**
-  String dockerStatusRunningAndStoppedFmt(Object runningCount, Object stoppedCount);
+  String dockerStatusRunningAndStoppedFmt(
+    Object runningCount,
+    Object stoppedCount,
+  );
 
   /// No description provided for @dockerStatusRunningFmt.
   ///
@@ -397,6 +463,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The current code highlighting performance is not ideal and can be optionally turned off to improve.'**
   String get editorHighlightTip;
+
+  /// No description provided for @emulator.
+  ///
+  /// In en, this message translates to:
+  /// **'Emulator'**
+  String get emulator;
 
   /// No description provided for @encode.
   ///
@@ -860,6 +932,12 @@ abstract class AppLocalizations {
   /// **'Port'**
   String get port;
 
+  /// No description provided for @preferDiskAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Prioritize displaying disk capacity'**
+  String get preferDiskAmount;
+
   /// No description provided for @preview.
   ///
   /// In en, this message translates to:
@@ -877,6 +955,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Process'**
   String get process;
+
+  /// No description provided for @prune.
+  ///
+  /// In en, this message translates to:
+  /// **'Prune'**
+  String get prune;
 
   /// No description provided for @pushToken.
   ///
@@ -901,12 +985,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This feature is currently in the testing phase and has only been tested on PVE 8+. Please use it with caution.'**
   String get pveVersionLow;
-
-  /// No description provided for @pwd.
-  ///
-  /// In en, this message translates to:
-  /// **'Password'**
-  String get pwd;
 
   /// No description provided for @read.
   ///
@@ -1463,11 +1541,12 @@ abstract class AppLocalizations {
   /// No description provided for @writeScriptTip.
   ///
   /// In en, this message translates to:
-  /// **'After connecting to the server, a script will be written to ~/.config/server_box to monitor the system status. You can review the script content.'**
+  /// **'After connecting to the server, a script will be written to `~/.config/server_box` \n | `/tmp/server_box` to monitor the system status. You can review the script content.'**
   String get writeScriptTip;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1476,44 +1555,70 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['de', 'en', 'es', 'fr', 'id', 'ja', 'nl', 'pt', 'ru', 'tr', 'uk', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'de',
+    'en',
+    'es',
+    'fr',
+    'id',
+    'ja',
+    'nl',
+    'pt',
+    'ru',
+    'tr',
+    'uk',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-    case 'zh': {
-  switch (locale.countryCode) {
-    case 'TW': return AppLocalizationsZhTw();
-   }
-  break;
-   }
+    case 'zh':
+      {
+        switch (locale.countryCode) {
+          case 'TW':
+            return AppLocalizationsZhTw();
+        }
+        break;
+      }
   }
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'de': return AppLocalizationsDe();
-    case 'en': return AppLocalizationsEn();
-    case 'es': return AppLocalizationsEs();
-    case 'fr': return AppLocalizationsFr();
-    case 'id': return AppLocalizationsId();
-    case 'ja': return AppLocalizationsJa();
-    case 'nl': return AppLocalizationsNl();
-    case 'pt': return AppLocalizationsPt();
-    case 'ru': return AppLocalizationsRu();
-    case 'tr': return AppLocalizationsTr();
-    case 'uk': return AppLocalizationsUk();
-    case 'zh': return AppLocalizationsZh();
+    case 'de':
+      return AppLocalizationsDe();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'id':
+      return AppLocalizationsId();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'nl':
+      return AppLocalizationsNl();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'tr':
+      return AppLocalizationsTr();
+    case 'uk':
+      return AppLocalizationsUk();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

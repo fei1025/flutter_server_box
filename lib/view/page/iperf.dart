@@ -2,14 +2,21 @@ import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/core/route.dart';
-import 'package:server_box/data/model/server/server_private_info.dart';
+import 'package:server_box/view/page/ssh/page/page.dart';
+
 
 class IPerfPage extends StatefulWidget {
-  final Spi spi;
-  const IPerfPage({super.key, required this.spi});
+  final SpiRequiredArgs args;
+
+  const IPerfPage({super.key, required this.args});
 
   @override
   State<IPerfPage> createState() => _IPerfPageState();
+
+  static const route = AppRouteArg<void, SpiRequiredArgs>(
+    page: IPerfPage.new,
+    path: '/iperf',
+  );
 }
 
 class _IPerfPageState extends State<IPerfPage> {
@@ -26,8 +33,8 @@ class _IPerfPageState extends State<IPerfPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: Text('iperf'),
+      appBar: CustomAppBar(
+        title: const Text('iperf'),
       ),
       body: _buildBody(),
       floatingActionButton: _buildFAB(),
@@ -43,10 +50,11 @@ class _IPerfPageState extends State<IPerfPage> {
           context.showSnackBar(libL10n.empty);
           return;
         }
-        AppRoutes.ssh(
-          spi: widget.spi,
+        final args = SshPageArgs(
+          spi: widget.args.spi,
           initCmd: 'iperf -c ${_hostCtrl.text} -p ${_portCtrl.text}',
-        ).go(context);
+        );
+        SSHPage.route.go(context, args);
       },
     );
   }

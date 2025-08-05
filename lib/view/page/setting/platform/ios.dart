@@ -3,17 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/core/utils/misc.dart';
 import 'package:server_box/data/res/store.dart';
-import 'package:server_box/view/page/setting/platform/platform_pub.dart';
 import 'package:watch_connectivity/watch_connectivity.dart';
 
-class IOSSettingsPage extends StatefulWidget {
-  const IOSSettingsPage({super.key});
+class IosSettingsPage extends StatefulWidget {
+  const IosSettingsPage({super.key});
 
   @override
-  State<IOSSettingsPage> createState() => _IOSSettingsPageState();
+  State<IosSettingsPage> createState() => _IosSettingsPageState();
+
+  static const route = AppRouteNoArg(page: IosSettingsPage.new, path: '/settings/ios');
 }
 
-class _IOSSettingsPageState extends State<IOSSettingsPage> {
+class _IosSettingsPageState extends State<IosSettingsPage> {
   final _pushToken = ValueNotifier<String?>(null);
 
   final wc = WatchConnectivity();
@@ -27,15 +28,13 @@ class _IOSSettingsPageState extends State<IOSSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: Text('iOS')),
+      appBar: CustomAppBar(title: const Text('iOS')),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 17),
         children: [
           _buildPushToken(),
           _buildAutoUpdateHomeWidget(),
           _buildWatchApp(),
-          if (BioAuth.isPlatformSupported)
-            PlatformPublicSettings.buildBioAuth(),
         ].map((e) => CardX(child: e)).toList(),
       ),
     );
@@ -64,12 +63,7 @@ class _IOSSettingsPageState extends State<IOSSettingsPage> {
         error: (error, trace) => Text('${libL10n.error}: $error'),
         success: (text) {
           _pushToken.value = text;
-          return Text(
-            text ?? 'null',
-            style: UIs.textGrey,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          );
+          return Text(text ?? 'null', style: UIs.textGrey, overflow: TextOverflow.ellipsis, maxLines: 1);
         },
       ),
     );
@@ -115,15 +109,27 @@ class _IOSSettingsPageState extends State<IOSSettingsPage> {
 
   void _onTapWatchApp(Map<String, dynamic> map) async {
     final urls = Map<String, String>.from(map['urls'] as Map? ?? {});
-    final result = await KvEditor.route.go(
-      context,
-      KvEditorArgs(data: urls),
-    );
+    final result = await KvEditor.route.go(context, KvEditorArgs(data: urls));
     if (result == null) return;
 
-    final (_, err) = await context.showLoadingDialog(fn: () async {
-      await wc.updateApplicationContext({'urls': result});
-    });
+    final (_, err) = await context.showLoadingDialog(
+      fn: () async {
+        final data = {'urls': result};
+
+        // Try realtime update (app must be running foreground).
+        try {
+          if (await wc.isReachable) {
+            await wc.sendMessage(data);
+            return;
+          }
+        } catch (e) {
+          Loggers.app.warning('Failed to send message to watch', e);
+        }
+
+        // fallback
+        await wc.updateApplicationContext(data);
+      },
+    );
     if (err == null) {
       context.showSnackBar(libL10n.success);
     }

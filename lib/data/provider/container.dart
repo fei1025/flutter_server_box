@@ -5,10 +5,10 @@ import 'package:dartssh2/dartssh2.dart';
 import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:server_box/core/extension/ssh_client.dart';
+import 'package:server_box/data/model/app/error.dart';
 import 'package:server_box/data/model/app/shell_func.dart';
 import 'package:server_box/data/model/container/image.dart';
 import 'package:server_box/data/model/container/ps.dart';
-import 'package:server_box/data/model/app/error.dart';
 import 'package:server_box/data/model/container/type.dart';
 import 'package:server_box/data/res/store.dart';
 
@@ -222,6 +222,23 @@ class ContainerProvider extends ChangeNotifier {
 
   Future<ContainerErr?> restart(String id) async => await run('restart $id');
 
+  Future<ContainerErr?> pruneImages({bool all = true}) async {
+    final cmd = 'image prune${all ? " -a" : ""} -f';
+    return await run(cmd);
+  }
+
+  Future<ContainerErr?> pruneContainers() async {
+    return await run('container prune -f');
+  }
+
+  Future<ContainerErr?> pruneVolumes() async {
+    return await run('volume prune -f');
+  }
+
+  Future<ContainerErr?> pruneSystem() async {
+    return await run('system prune -a -f --volumes');
+  }
+
   Future<ContainerErr?> run(String cmd, {bool autoRefresh = true}) async {
     cmd = switch (type) {
       ContainerType.docker => 'docker $cmd',
@@ -272,6 +289,8 @@ enum ContainerCmdType {
   ps,
   stats,
   images,
+  // No specific commands needed for prune actions as they are simple
+  // and don't require splitting output with ShellFunc.seperator
   ;
 
   String exec(

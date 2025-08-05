@@ -8,26 +8,48 @@ class SnippetStore extends HiveStore {
   static final instance = SnippetStore._();
 
   void put(Snippet snippet) {
-    // box.put(snippet.name, snippet);
-    // box.updateLastModified();
     set(snippet.name, snippet);
   }
 
   List<Snippet> fetch() {
-    final keys = box.keys;
-    final ss = <Snippet>[];
-    for (final key in keys) {
-      final s = box.get(key);
-      if (s != null && s is Snippet) {
+    final ss = <Snippet>{};
+    for (final key in keys()) {
+      final s = get<Snippet>(
+        key,
+        fromObj: (val) {
+          if (val is Snippet) return val;
+          if (val is Map<dynamic, dynamic>) {
+            final map = val.toStrDynMap;
+            if (map == null) return null;
+            try {
+              final snippet = Snippet.fromJson(map as Map<String, dynamic>);
+              put(snippet);
+              return snippet;
+            } catch (e) {
+              dprint('Parsing Snippet from JSON', e);
+            }
+          }
+          return null;
+        },
+      );
+      if (s != null) {
         ss.add(s);
       }
     }
-    return ss;
+    return ss.toList();
   }
 
   void delete(Snippet s) {
-    // box.delete(s.name);
-    // box.updateLastModified();
     remove(s.name);
   }
+
+  void update(Snippet old, Snippet newInfo) {
+    if (!have(old)) {
+      throw Exception('Old snippet: $old not found');
+    }
+    delete(old);
+    put(newInfo);
+  }
+
+  bool have(Snippet s) => get(s.name) != null;
 }

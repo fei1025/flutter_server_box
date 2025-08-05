@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'l10n.dart';
 
 // ignore_for_file: type=lint
@@ -7,13 +9,15 @@ class AppLocalizationsNl extends AppLocalizations {
   AppLocalizationsNl([String locale = 'nl']) : super(locale);
 
   @override
-  String get aboutThanks => 'Met dank aan de volgende mensen die hebben deelgenomen aan.';
+  String get aboutThanks =>
+      'Met dank aan de volgende mensen die hebben deelgenomen aan.';
 
   @override
   String get acceptBeta => 'Accepteer testversie-updates';
 
   @override
-  String get addSystemPrivateKeyTip => 'Er is momenteel geen privésleutel, wilt u degene toevoegen die bij het systeem wordt geleverd (~/.ssh/id_rsa)?';
+  String get addSystemPrivateKeyTip =>
+      'Er is momenteel geen privésleutel, wilt u degene toevoegen die bij het systeem wordt geleverd (~/.ssh/id_rsa)?';
 
   @override
   String get added2List => 'Toegevoegd aan takenlijst';
@@ -25,10 +29,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get alreadyLastDir => 'Al in de laatst gebruikte map.';
 
   @override
-  String get authFailTip => 'Authenticatie mislukt, controleer of het wachtwoord/sleutel/host/gebruiker, enz., incorrect zijn.';
+  String get authFailTip =>
+      'Authenticatie mislukt, controleer of het wachtwoord/sleutel/host/gebruiker, enz., incorrect zijn.';
 
   @override
-  String get autoBackupConflict => 'Er kan slechts één automatische back-up tegelijk worden ingeschakeld.';
+  String get autoBackupConflict =>
+      'Er kan slechts één automatische back-up tegelijk worden ingeschakeld.';
 
   @override
   String get autoConnect => 'Automatisch verbinden';
@@ -40,10 +46,33 @@ class AppLocalizationsNl extends AppLocalizations {
   String get autoUpdateHomeWidget => 'Automatische update van home-widget';
 
   @override
-  String get backupTip => 'De geëxporteerde gegevens zijn simpelweg versleuteld. \nBewaar deze aub veilig.';
+  String get backupTip =>
+      'De geëxporteerde gegevens kunnen worden versleuteld met een wachtwoord. \nBewaar deze aub veilig.';
 
   @override
   String get backupVersionNotMatch => 'Back-upversie komt niet overeen.';
+
+  @override
+  String get backupPassword => 'Back-up wachtwoord';
+
+  @override
+  String get backupPasswordTip =>
+      'Stel een wachtwoord in om back-upbestanden te versleutelen. Laat leeg om versleuteling uit te schakelen.';
+
+  @override
+  String get backupPasswordWrong => 'Onjuist back-up wachtwoord';
+
+  @override
+  String get backupEncrypted => 'Back-up is versleuteld';
+
+  @override
+  String get backupNotEncrypted => 'Back-up is niet versleuteld';
+
+  @override
+  String get backupPasswordSet => 'Back-up wachtwoord ingesteld';
+
+  @override
+  String get backupPasswordRemoved => 'Back-up wachtwoord verwijderd';
 
   @override
   String get battery => 'Batterij';
@@ -52,13 +81,18 @@ class AppLocalizationsNl extends AppLocalizations {
   String get bgRun => 'Uitvoeren op de achtergrond';
 
   @override
-  String get bgRunTip => 'Deze schakelaar betekent alleen dat het programma zal proberen op de achtergrond uit te voeren, of het in de achtergrond kan worden uitgevoerd, hangt af van of de toestemming is ingeschakeld of niet. Voor native Android, schakel \"Batterijoptimalisatie\" uit in deze app, en voor miui, wijzig de energiebesparingsbeleid naar \"Onbeperkt\".';
+  String get bgRunTip =>
+      'Deze schakelaar betekent alleen dat het programma zal proberen op de achtergrond uit te voeren, of het in de achtergrond kan worden uitgevoerd, hangt af van of de toestemming is ingeschakeld of niet. Voor native Android, schakel \"Batterijoptimalisatie\" uit in deze app, en voor miui, wijzig de energiebesparingsbeleid naar \"Onbeperkt\".';
+
+  @override
+  String get closeAfterSave => 'Opslaan en sluiten';
 
   @override
   String get cmd => 'Opdracht';
 
   @override
-  String get collapseUITip => 'Of lange lijsten in de UI standaard moeten worden ingeklapt';
+  String get collapseUITip =>
+      'Of lange lijsten in de UI standaard moeten worden ingeklapt';
 
   @override
   String get conn => 'Verbinding';
@@ -67,7 +101,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get container => 'Container';
 
   @override
-  String get containerTrySudoTip => 'Bijvoorbeeld: in de app is de gebruiker ingesteld op aaa, maar Docker is geïnstalleerd onder de rootgebruiker. In dit geval moet u deze optie inschakelen.';
+  String get containerTrySudoTip =>
+      'Bijvoorbeeld: in de app is de gebruiker ingesteld op aaa, maar Docker is geïnstalleerd onder de rootgebruiker. In dit geval moet u deze optie inschakelen.';
 
   @override
   String get convert => 'Converteren';
@@ -76,7 +111,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get copyPath => 'Pad kopiëren';
 
   @override
-  String get cpuViewAsProgressTip => 'Toon het gebruik van elke CPU in een voortgangsbalkstijl (oude stijl)';
+  String get cpuViewAsProgressTip =>
+      'Toon het gebruik van elke CPU in een voortgangsbalkstijl (oude stijl)';
 
   @override
   String get cursorType => 'Cursortype';
@@ -85,7 +121,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get customCmd => 'Aangepaste opdrachten';
 
   @override
-  String get customCmdDocUrl => 'https://github.com/lollipopkit/flutter_server_box/wiki#custom-commands';
+  String get customCmdDocUrl =>
+      'https://github.com/lollipopkit/flutter_server_box/wiki#custom-commands';
 
   @override
   String get customCmdHint => '\"Opdrachtnaam\": \"Opdracht\"';
@@ -100,6 +137,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get deleteServers => 'Servers batchgewijs verwijderen';
 
   @override
+  String get desktopTerminalTip =>
+      'Opdracht die wordt gebruikt om de terminalemulator te openen bij het starten van SSH-sessies.';
+
+  @override
   String get dirEmpty => 'Zorg ervoor dat de map leeg is.';
 
   @override
@@ -107,6 +148,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get disk => 'Schijf';
+
+  @override
+  String get diskHealth => 'Schijfgezondheid';
 
   @override
   String get diskIgnorePath => 'Pad negeren voor schijf';
@@ -120,7 +164,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get dockerEmptyRunningItems => 'Er zijn geen actieve containers.\nDit kan komen doordat:\n- De Docker-installatiegebruiker niet overeenkomt met de gebruikersnaam die is geconfigureerd binnen de app.\n- De omgevingsvariabele DOCKER_HOST is niet correct gelezen. U kunt deze krijgen door `echo \$DOCKER_HOST` in de terminal uit te voeren.';
+  String get dockerEmptyRunningItems =>
+      'Er zijn geen actieve containers.\nDit kan komen doordat:\n- De Docker-installatiegebruiker niet overeenkomt met de gebruikersnaam die is geconfigureerd binnen de app.\n- De omgevingsvariabele DOCKER_HOST is niet correct gelezen. U kunt deze krijgen door `echo \$DOCKER_HOST` in de terminal uit te voeren.';
 
   @override
   String dockerImagesFmt(Object count) {
@@ -131,7 +176,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get dockerNotInstalled => 'Docker niet geïnstalleerd';
 
   @override
-  String dockerStatusRunningAndStoppedFmt(Object runningCount, Object stoppedCount) {
+  String dockerStatusRunningAndStoppedFmt(
+    Object runningCount,
+    Object stoppedCount,
+  ) {
     return '$runningCount actief, $stoppedCount container gestopt.';
   }
 
@@ -144,7 +192,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get doubleColumnMode => 'Dubbele kolommodus';
 
   @override
-  String get doubleColumnTip => 'Deze optie schakelt alleen de functie in, of deze daadwerkelijk kan worden ingeschakeld, hangt af van de breedte van het apparaat';
+  String get doubleColumnTip =>
+      'Deze optie schakelt alleen de functie in, of deze daadwerkelijk kan worden ingeschakeld, hangt af van de breedte van het apparaat';
 
   @override
   String get editVirtKeys => 'Virtuele toetsen bewerken';
@@ -153,7 +202,11 @@ class AppLocalizationsNl extends AppLocalizations {
   String get editor => 'Editor';
 
   @override
-  String get editorHighlightTip => 'De huidige codehighlighting-prestaties zijn slechter en kunnen optioneel worden uitgeschakeld om te verbeteren.';
+  String get editorHighlightTip =>
+      'De huidige codehighlighting-prestaties zijn slechter en kunnen optioneel worden uitgeschakeld om te verbeteren.';
+
+  @override
+  String get emulator => 'Emulator';
 
   @override
   String get encode => 'Coderen';
@@ -171,13 +224,15 @@ class AppLocalizationsNl extends AppLocalizations {
   String get fallbackSshDest => 'Fallback SSH-bestemming';
 
   @override
-  String get fdroidReleaseTip => 'Als u deze app van F-Droid heeft gedownload, wordt aanbevolen deze optie uit te schakelen.';
+  String get fdroidReleaseTip =>
+      'Als u deze app van F-Droid heeft gedownload, wordt aanbevolen deze optie uit te schakelen.';
 
   @override
   String get fgService => 'Voorgrondservice';
 
   @override
-  String get fgServiceTip => 'Na het inschakelen kunnen sommige apparaatmodellen crashen. Uitschakelen kan ertoe leiden dat sommige modellen SSH-verbindingen niet op de achtergrond kunnen behouden. Sta ServerBox notificatierechten, achtergronduitvoering en zelf-ontwaken toe in systeeminstellingen.';
+  String get fgServiceTip =>
+      'Na het inschakelen kunnen sommige apparaatmodellen crashen. Uitschakelen kan ertoe leiden dat sommige modellen SSH-verbindingen niet op de achtergrond kunnen behouden. Sta ServerBox notificatierechten, achtergronduitvoering en zelf-ontwaken toe in systeeminstellingen.';
 
   @override
   String fileTooLarge(Object file, Object size, Object sizeMax) {
@@ -206,7 +261,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get fullScreenJitterHelp => 'Om inbranden van het scherm te voorkomen';
 
   @override
-  String get fullScreenTip => 'Moet de volledig schermmodus worden ingeschakeld wanneer het apparaat naar de liggende modus wordt gedraaid? Deze optie is alleen van toepassing op het servertabblad.';
+  String get fullScreenTip =>
+      'Moet de volledig schermmodus worden ingeschakeld wanneer het apparaat naar de liggende modus wordt gedraaid? Deze optie is alleen van toepassing op het servertabblad.';
 
   @override
   String get goBackQ => 'Terug gaan?';
@@ -250,7 +306,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get install => 'Installeren';
 
   @override
-  String get installDockerWithUrl => 'Installeer eerst docker via https://docs.docker.com/engine/install.';
+  String get installDockerWithUrl =>
+      'Installeer eerst docker via https://docs.docker.com/engine/install.';
 
   @override
   String get invalid => 'Ongeldig';
@@ -265,7 +322,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get keepStatusWhenErr => 'Behoud de laatste serverstatus';
 
   @override
-  String get keepStatusWhenErrTip => 'Alleen in geval van een fout tijdens de scriptuitvoering';
+  String get keepStatusWhenErrTip =>
+      'Alleen in geval van een fout tijdens de scriptuitvoering';
 
   @override
   String get keyAuth => 'Sleutelauthenticatie';
@@ -274,7 +332,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get letterCache => 'Lettercaching';
 
   @override
-  String get letterCacheTip => 'Aanbevolen om uit te schakelen, maar na het uitschakelen is het niet mogelijk om CJK-tekens in te voeren.';
+  String get letterCacheTip =>
+      'Aanbevolen om uit te schakelen, maar na het uitschakelen is het niet mogelijk om CJK-tekens in te voeren.';
 
   @override
   String get license => 'Licentie';
@@ -312,13 +371,15 @@ class AppLocalizationsNl extends AppLocalizations {
   String get more => 'Meer';
 
   @override
-  String get moveOutServerFuncBtnsHelp => 'Aan: kan worden weergegeven onder elke kaart op de Server-tabbladpagina. Uit: kan worden weergegeven bovenaan de Serverdetails-pagina.';
+  String get moveOutServerFuncBtnsHelp =>
+      'Aan: kan worden weergegeven onder elke kaart op de Server-tabbladpagina. Uit: kan worden weergegeven bovenaan de Serverdetails-pagina.';
 
   @override
   String get ms => 'ms';
 
   @override
-  String get needHomeDir => 'Als u een Synology-gebruiker bent, [zie hier](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Gebruikers van andere systemen moeten zoeken hoe ze een home directory kunnen creëren.';
+  String get needHomeDir =>
+      'Als u een Synology-gebruiker bent, [zie hier](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Gebruikers van andere systemen moeten zoeken hoe ze een home directory kunnen creëren.';
 
   @override
   String get needRestart => 'App moet opnieuw worden gestart';
@@ -339,7 +400,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get noLineChartForCpu => 'Gebruik geen lijndiagrammen voor CPU';
 
   @override
-  String get noPrivateKeyTip => 'De privésleutel bestaat niet, deze is mogelijk verwijderd of er is een configuratiefout.';
+  String get noPrivateKeyTip =>
+      'De privésleutel bestaat niet, deze is mogelijk verwijderd of er is een configuratiefout.';
 
   @override
   String get noPromptAgain => 'Niet meer vragen';
@@ -357,16 +419,19 @@ class AppLocalizationsNl extends AppLocalizations {
   String get onlyOneLine => 'Alleen als één regel weergeven (scrollbaar)';
 
   @override
-  String get onlyWhenCoreBiggerThan8 => 'Alleen effectief wanneer het aantal cores > 8';
+  String get onlyWhenCoreBiggerThan8 =>
+      'Alleen effectief wanneer het aantal cores > 8';
 
   @override
   String get openLastPath => 'Open het laatste pad';
 
   @override
-  String get openLastPathTip => 'Verschillende servers hebben verschillende logs, en de log is het pad naar de uitgang';
+  String get openLastPathTip =>
+      'Verschillende servers hebben verschillende logs, en de log is het pad naar de uitgang';
 
   @override
-  String get parseContainerStatsTip => 'Het parsen van de bezettingsstatus van Docker is relatief langzaam.';
+  String get parseContainerStatsTip =>
+      'Het parsen van de bezettingsstatus van Docker is relatief langzaam.';
 
   @override
   String percentOfSize(Object percent, Object size) {
@@ -383,7 +448,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get pingInputIP => 'Voer een doel-IP / domein in.';
 
   @override
-  String get pingNoServer => 'Geen server om te pingen.\nVoeg een server toe in het servertabblad.';
+  String get pingNoServer =>
+      'Geen server om te pingen.\nVoeg een server toe in het servertabblad.';
 
   @override
   String get pkg => 'Pkg';
@@ -395,6 +461,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get port => 'Poort';
 
   @override
+  String get preferDiskAmount =>
+      'Geef de schijfcapaciteit prioriteit bij weergave';
+
+  @override
   String get preview => 'Voorbeeld';
 
   @override
@@ -404,19 +474,22 @@ class AppLocalizationsNl extends AppLocalizations {
   String get process => 'Proces';
 
   @override
+  String get prune => 'Snoeien';
+
+  @override
   String get pushToken => 'Push-token';
 
   @override
-  String get pveIgnoreCertTip => 'Niet aanbevolen om in te schakelen, let op beveiligingsrisico\'s! Als u de standaardcertificaat van PVE gebruikt, moet u deze optie inschakelen.';
+  String get pveIgnoreCertTip =>
+      'Niet aanbevolen om in te schakelen, let op beveiligingsrisico\'s! Als u de standaardcertificaat van PVE gebruikt, moet u deze optie inschakelen.';
 
   @override
-  String get pveLoginFailed => 'Aanmelden mislukt. Kan niet authenticeren met gebruikersnaam/wachtwoord van serverconfiguratie voor Linux PAM-login.';
+  String get pveLoginFailed =>
+      'Aanmelden mislukt. Kan niet authenticeren met gebruikersnaam/wachtwoord van serverconfiguratie voor Linux PAM-login.';
 
   @override
-  String get pveVersionLow => 'Deze functie bevindt zich momenteel in de testfase en is alleen getest op PVE 8+. Gebruik het met voorzichtigheid.';
-
-  @override
-  String get pwd => 'Wachtwoord';
+  String get pveVersionLow =>
+      'Deze functie bevindt zich momenteel in de testfase en is alleen getest op PVE 8+. Gebruik het met voorzichtigheid.';
 
   @override
   String get read => 'Lezen';
@@ -428,7 +501,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get rememberPwdInMem => 'Wachtwoord onthouden in geheugen';
 
   @override
-  String get rememberPwdInMemTip => 'Gebruikt voor containers, opschorting, enz.';
+  String get rememberPwdInMemTip =>
+      'Gebruikt voor containers, opschorting, enz.';
 
   @override
   String get rememberWindowSize => 'Venstergrootte onthouden';
@@ -488,10 +562,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get sftpDlPrepare => 'Voorbereiden om verbinding te maken...';
 
   @override
-  String get sftpEditorTip => 'Indien leeg, gebruik de ingebouwde bestandseditor van de app. Indien een waarde aanwezig is, gebruik de editor van de externe server, bijvoorbeeld `vim` (aanbevolen om automatisch te detecteren volgens `EDITOR`).';
+  String get sftpEditorTip =>
+      'Indien leeg, gebruik de ingebouwde bestandseditor van de app. Indien een waarde aanwezig is, gebruik de editor van de externe server, bijvoorbeeld `vim` (aanbevolen om automatisch te detecteren volgens `EDITOR`).';
 
   @override
-  String get sftpRmrDirSummary => 'Gebruik `rm -r` om een map te verwijderen in SFTP.';
+  String get sftpRmrDirSummary =>
+      'Gebruik `rm -r` om een map te verwijderen in SFTP.';
 
   @override
   String get sftpSSHConnected => 'SFTP Verbonden';
@@ -518,7 +594,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get specifyDev => 'Apparaat specificeren';
 
   @override
-  String get specifyDevTip => 'Bijvoorbeeld, netwerkverkeersstatistieken zijn standaard voor alle apparaten. Hier kunt u een specifiek apparaat opgeven.';
+  String get specifyDevTip =>
+      'Bijvoorbeeld, netwerkverkeersstatistieken zijn standaard voor alle apparaten. Hier kunt u een specifiek apparaat opgeven.';
 
   @override
   String get speed => 'Snelheid';
@@ -529,7 +606,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get sshTermHelp => 'Wanneer het terminal scrollbaar is, kan horizontaal slepen tekst selecteren. Klikken op de toetsenbordknop schakelt het toetsenbord aan/uit. Het bestandsicoon opent de huidige pad SFTP. De klembordknop kopieert de inhoud wanneer tekst is geselecteerd en plakt inhoud van het klembord in de terminal wanneer geen tekst is geselecteerd en er inhoud op het klembord staat. Het code-icoon plakt codefragmenten in de terminal en voert ze uit.';
+  String get sshTermHelp =>
+      'Wanneer het terminal scrollbaar is, kan horizontaal slepen tekst selecteren. Klikken op de toetsenbordknop schakelt het toetsenbord aan/uit. Het bestandsicoon opent de huidige pad SFTP. De klembordknop kopieert de inhoud wanneer tekst is geselecteerd en plakt inhoud van het klembord in de terminal wanneer geen tekst is geselecteerd en er inhoud op het klembord staat. Het code-icoon plakt codefragmenten in de terminal en voert ze uit.';
 
   @override
   String sshTip(Object url) {
@@ -537,7 +615,8 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get sshVirtualKeyAutoOff => 'Automatisch schakelen van virtuele toetsen';
+  String get sshVirtualKeyAutoOff =>
+      'Automatisch schakelen van virtuele toetsen';
 
   @override
   String get start => 'Starten';
@@ -558,13 +637,15 @@ class AppLocalizationsNl extends AppLocalizations {
   String get storage => 'Opslag';
 
   @override
-  String get supportFmtArgs => 'De volgende opmaakparameters worden ondersteund:';
+  String get supportFmtArgs =>
+      'De volgende opmaakparameters worden ondersteund:';
 
   @override
   String get suspend => 'Ophangen';
 
   @override
-  String get suspendTip => 'De opschortfunctie vereist rootrechten en systemd-ondersteuning.';
+  String get suspendTip =>
+      'De opschortfunctie vereist rootrechten en systemd-ondersteuning.';
 
   @override
   String switchTo(Object val) {
@@ -575,7 +656,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get sync => 'Sync';
 
   @override
-  String get syncTip => 'Een herstart kan nodig zijn voor sommige wijzigingen om van kracht te worden.';
+  String get syncTip =>
+      'Een herstart kan nodig zijn voor sommige wijzigingen om van kracht te worden.';
 
   @override
   String get system => 'Systeem';
@@ -587,7 +669,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get temperature => 'Temperatuur';
 
   @override
-  String get termFontSizeTip => 'Deze instelling heeft invloed op de terminalgrootte (breedte en hoogte). U kunt inzoomen op de terminalpagina om de lettergrootte van de huidige sessie aan te passen.';
+  String get termFontSizeTip =>
+      'Deze instelling heeft invloed op de terminalgrootte (breedte en hoogte). U kunt inzoomen op de terminalpagina om de lettergrootte van de huidige sessie aan te passen.';
 
   @override
   String get terminal => 'Terminal';
@@ -599,7 +682,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get textScaler => 'Tekstschaler';
 
   @override
-  String get textScalerTip => '1.0 => 100% (oorspronkelijke grootte), werkt alleen op het gedeelte van de serverpagina van het lettertype, niet aanbevolen om te wijzigen.';
+  String get textScalerTip =>
+      '1.0 => 100% (oorspronkelijke grootte), werkt alleen op het gedeelte van de serverpagina van het lettertype, niet aanbevolen om te wijzigen.';
 
   @override
   String get theme => 'Thema';
@@ -632,10 +716,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get update => 'Bijwerken';
 
   @override
-  String get updateIntervalEqual0 => 'Het staat op 0, het zal niet automatisch bijwerken\nCPU status kan niet berekend worden.';
+  String get updateIntervalEqual0 =>
+      'Het staat op 0, het zal niet automatisch bijwerken\nCPU status kan niet berekend worden.';
 
   @override
-  String get updateServerStatusInterval => 'Interne server status bijwerking interval';
+  String get updateServerStatusInterval =>
+      'Interne server status bijwerking interval';
 
   @override
   String get upload => 'Upload';
@@ -650,7 +736,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get useCdn => 'Gebruikt CDN';
 
   @override
-  String get useCdnTip => 'Niet-chinese gebruikers worden aangeraden om deze CDN te gebruiken. Wil je dat?';
+  String get useCdnTip =>
+      'Niet-chinese gebruikers worden aangeraden om deze CDN te gebruiken. Wil je dat?';
 
   @override
   String get useNoPwd => 'Er zal geen wachtwoord gebruikt worden';
@@ -668,7 +755,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get viewErr => 'Zie foutmelding';
 
   @override
-  String get virtKeyHelpClipboard => 'Kopiëren naar het klembord als de geselecteerde terminal niet leeg is, anders de inhoud van het klembord plakken in de terminal.';
+  String get virtKeyHelpClipboard =>
+      'Kopiëren naar het klembord als de geselecteerde terminal niet leeg is, anders de inhoud van het klembord plakken in de terminal.';
 
   @override
   String get virtKeyHelpIME => 'Toetsenbord aan/uit zetten';
@@ -677,7 +765,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get virtKeyHelpSFTP => 'Huidige map openen in SFTP.';
 
   @override
-  String get waitConnection => 'Wacht alstublieft tot de verbinding tot stand is gebracht.';
+  String get waitConnection =>
+      'Wacht alstublieft tot de verbinding tot stand is gebracht.';
 
   @override
   String get wakeLock => 'Wakker houden';
@@ -692,14 +781,17 @@ class AppLocalizationsNl extends AppLocalizations {
   String get whenOpenApp => 'Bij het openen van de app';
 
   @override
-  String get wolTip => 'Na het configureren van WOL (Wake-on-LAN), wordt elke keer dat de server wordt verbonden een WOL-verzoek verzonden.';
+  String get wolTip =>
+      'Na het configureren van WOL (Wake-on-LAN), wordt elke keer dat de server wordt verbonden een WOL-verzoek verzonden.';
 
   @override
   String get write => 'Schrijven';
 
   @override
-  String get writeScriptFailTip => 'Het schrijven naar het script is mislukt, mogelijk door gebrek aan rechten of omdat de map niet bestaat.';
+  String get writeScriptFailTip =>
+      'Het schrijven naar het script is mislukt, mogelijk door gebrek aan rechten of omdat de map niet bestaat.';
 
   @override
-  String get writeScriptTip => 'Na het verbinden met de server wordt een script geschreven naar ~/.config/server_box om de systeemstatus te monitoren. U kunt de inhoud van het script controleren.';
+  String get writeScriptTip =>
+      'Na het verbinden met de server wordt een script geschreven naar `~/.config/server_box` \n | `/tmp/server_box` om de systeemstatus te monitoren. U kunt de inhoud van het script controleren.';
 }

@@ -1,27 +1,23 @@
 import 'dart:io';
 
 import 'package:fl_lib/fl_lib.dart';
-import 'package:server_box/data/model/app/backup.dart';
+import 'package:server_box/data/model/app/bak/backup2.dart';
+import 'package:server_box/data/model/app/bak/utils.dart';
 
 const bakSync = BakSyncer._();
 
 final icloud = ICloud(containerId: 'iCloud.tech.lolli.serverbox');
 
-final class BakSyncer extends SyncIface<Backup> {
+final class BakSyncer extends SyncIface {
   const BakSyncer._() : super();
 
   @override
-  void init() {
-    Webdav.shared.prefix = 'serverbox/';
-  }
+  Future<void> saveToFile() => BackupV2.backup();
 
   @override
-  Future<void> saveToFile() => Backup.backup();
-
-  @override
-  Future<Backup> fromFile(String path) async {
+  Future<Mergeable> fromFile(String path) async {
     final content = await File(path).readAsString();
-    return Backup.fromJsonString(content);
+    return MergeableUtils.fromJsonString(content).$1;
   }
 
   @override

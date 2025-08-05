@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:server_box/core/extension/context/locale.dart';
+import 'package:server_box/data/model/app/path_with_prefix.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/model/sftp/worker.dart';
 import 'package:server_box/data/provider/server.dart';
 import 'package:server_box/data/provider/sftp.dart';
 import 'package:server_box/data/res/misc.dart';
-
-import 'package:server_box/core/route.dart';
-import 'package:server_box/data/model/app/path_with_prefix.dart';
-import 'package:server_box/view/page/editor.dart';
+import 'package:server_box/data/store/setting.dart';
+import 'package:server_box/view/page/storage/sftp.dart';
+import 'package:server_box/view/page/storage/sftp_mission.dart';
 
 final class LocalFilePageArgs {
   final bool? isPickFile;
@@ -29,15 +29,14 @@ class LocalFilePage extends StatefulWidget {
 
   static const route = AppRoute<String, LocalFilePageArgs>(
     page: LocalFilePage.new,
-    path: '/local_file',
+    path: '/files/local',
   );
 
   @override
   State<LocalFilePage> createState() => _LocalFilePageState();
 }
 
-class _LocalFilePageState extends State<LocalFilePage>
-    with AutomaticKeepAliveClientMixin {
+class _LocalFilePageState extends State<LocalFilePage> with AutomaticKeepAliveClientMixin {
   late final _path = LocalPath(widget.args?.initDir ?? Paths.file);
   final _sortType = _SortType.name.vn;
   bool get isPickFile => widget.args?.isPickFile ?? false;
@@ -74,11 +73,24 @@ class _LocalFilePageState extends State<LocalFilePage>
               },
               icon: const Icon(Icons.add),
             ),
+          if (!isMobile)
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
+              onPressed: () => setState(() {}),
+            ),
           if (!isPickFile) _buildMissionBtn(),
           _buildSortBtn(),
         ],
       ),
-      body: _sortType.listen(_buildBody),
+      body: isMobile
+          ? RefreshIndicator(
+              onRefresh: () async {
+                setState(() {});
+              },
+              child: _sortType.listen(_buildBody),
+            )
+          : _sortType.listen(_buildBody),
     );
   }
 
@@ -95,63 +107,37 @@ class _LocalFilePageState extends State<LocalFilePage>
     return FutureWidget(
       future: getEntities(),
       loading: UIs.placeholder,
-      success: (items_) {
-        final items = items_ ?? [];
+      success: (items) {
+        items ??= [];
         final len = _path.canBack ? items.length + 1 : items.length;
         return ListView.builder(
           itemCount: len,
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 13),
           itemBuilder: (context, index) {
             if (index == 0 && _path.canBack) {
-              return CardX(
-                child: ListTile(
-                  leading: const Icon(Icons.arrow_back),
-                  title: const Text('..'),
-                  onTap: () {
-                    _path.update('..');
-                    setState(() {});
-                  },
-                ),
-              );
+              return ListTile(
+                leading: const Icon(Icons.arrow_back),
+                title: const Text('..'),
+                onTap: () {
+                  _path.update('..');
+                  setState(() {});
+                },
+              ).cardx;
             }
 
             if (_path.canBack) index--;
 
-            final item = items[index];
+            final item = items![index];
             final file = item.$1;
             final fileName = file.path.split('/').last;
             final stat = item.$2;
             final isDir = stat.type == FileSystemEntityType.directory;
 
-            return CardX(
-              child: ListTile(
-                leading: isDir
-                    ? const Icon(Icons.folder_open)
-                    : const Icon(Icons.insert_drive_file),
-                title: Text(fileName),
-                subtitle: isDir
-                    ? null
-                    : Text(stat.size.bytes2Str, style: UIs.textGrey),
-                trailing: Text(
-                  stat.modified.ymdhms(),
-                  style: UIs.textGrey,
-                ),
-                onLongPress: () {
-                  if (isDir) {
-                    _showDirActionDialog(file);
-                    return;
-                  }
-                  _showFileActionDialog(file);
-                },
-                onTap: () {
-                  if (!isDir) {
-                    _showFileActionDialog(file);
-                    return;
-                  }
-                  _path.update(fileName);
-                  setState(() {});
-                },
-              ),
+            return _buildItem(
+              file: file,
+              fileName: fileName,
+              stat: stat,
+              isDir: isDir,
             );
           },
         );
@@ -159,6 +145,66 @@ class _LocalFilePageState extends State<LocalFilePage>
     );
   }
 
+  Widget _buildItem({
+    required FileSystemEntity file,
+    required String fileName,
+    required FileStat stat,
+    required bool isDir,
+  }) {
+    return CardX(
+      child: ListTile(
+        leading: isDir ? const Icon(Icons.folder_open) : const Icon(Icons.insert_drive_file),
+        title: Text(fileName),
+        subtitle: isDir ? null : Text(stat.size.bytes2Str, style: UIs.textGrey),
+        trailing: Text(
+          stat.modified.ymdhms(),
+          style: UIs.textGrey,
+        ),
+        onLongPress: () {
+          if (isDir) {
+            _showDirActionDialog(file);
+            return;
+          }
+          _showFileActionDialog(file);
+        },
+        onTap: () {
+          if (!isDir) {
+            _showFileActionDialog(file);
+            return;
+          }
+          _path.update(fileName);
+          setState(() {});
+        },
+      ),
+    );
+  }
+
+  Widget _buildMissionBtn() {
+    return IconButton(
+      icon: const Icon(Icons.downloading),
+      onPressed: () => SftpMissionPage.route.go(context),
+    );
+  }
+
+  Widget _buildSortBtn() {
+    return _sortType.listenVal(
+      (value) {
+        return PopupMenuButton<_SortType>(
+          icon: const Icon(Icons.sort),
+          itemBuilder: (_) => _SortType.values.map((e) => e.menuItem).toList(),
+          onSelected: (value) {
+            _sortType.value = value;
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+extension _Actions on _LocalFilePageState {
   Future<void> _showDirActionDialog(FileSystemEntity file) async {
     context.showRoundDialog(
       child: Column(
@@ -186,7 +232,7 @@ class _LocalFilePageState extends State<LocalFilePage>
   }
 
   Future<void> _showFileActionDialog(FileSystemEntity file) async {
-    final fileName = file.path.split('/').last;
+    final fileName = file.path.split('/').lastOrNull ?? '';
     if (isPickFile) {
       context.showRoundDialog(
         title: libL10n.file,
@@ -204,29 +250,12 @@ class _LocalFilePageState extends State<LocalFilePage>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Btn.tile(
-            icon: const Icon(Icons.edit),
-            text: libL10n.edit,
-            onTap: () async {
-              context.pop();
-              final stat = await file.stat();
-              if (stat.size > Miscs.editorMaxSize) {
-                context.showRoundDialog(
-                  title: libL10n.attention,
-                  child: Text(l10n.fileTooLarge(fileName, stat.size, '1m')),
-                );
-                return;
-              }
-              final ret = await EditorPage.route.go(
-                context,
-                args: EditorPageArgs(path: file.absolute.path),
-              );
-              if (ret?.editExistedOk == true) {
-                context.showSnackBar(l10n.saved);
-                setState(() {});
-              }
-            },
-          ),
+          if (isMobile)
+            Btn.tile(
+              icon: const Icon(Icons.edit),
+              text: libL10n.edit,
+              onTap: () => _onTapEdit(file, fileName),
+            ),
           Btn.tile(
             icon: const Icon(Icons.abc),
             text: libL10n.rename,
@@ -246,41 +275,13 @@ class _LocalFilePageState extends State<LocalFilePage>
           Btn.tile(
             icon: const Icon(Icons.upload),
             text: l10n.upload,
-            onTap: () async {
-              context.pop();
-
-              final spi = await context.showPickSingleDialog<Spi>(
-                title: libL10n.select,
-                items: ServerProvider.serverOrder.value
-                    .map((e) => ServerProvider.pick(id: e)?.value.spi)
-                    .whereType<Spi>()
-                    .toList(),
-                display: (e) => e.name,
-              );
-              if (spi == null) return;
-
-              final remotePath = await AppRoutes.sftp(
-                spi: spi,
-                isSelect: true,
-              ).go<String>(context);
-              if (remotePath == null) {
-                return;
-              }
-
-              SftpProvider.add(SftpReq(
-                spi,
-                '$remotePath/$fileName',
-                file.absolute.path,
-                SftpReqType.upload,
-              ));
-              context.showSnackBar(l10n.added2List);
-            },
+            onTap: () => _onTapUpload(file, fileName),
           ),
           Btn.tile(
             icon: const Icon(Icons.open_in_new),
             text: libL10n.open,
             onTap: () {
-              Pfs.share(path: file.absolute.path);
+              Pfs.sharePaths(paths: [file.absolute.path]);
             },
           ),
         ],
@@ -302,7 +303,7 @@ class _LocalFilePageState extends State<LocalFilePage>
       final newPath = '${file.parent.path}${Pfs.seperator}$newName';
       await context.showLoadingDialog(fn: () => file.rename(newPath));
 
-      setState(() {});
+      setStateSafe(() {});
     }
 
     context.showRoundDialog(
@@ -334,35 +335,70 @@ class _LocalFilePageState extends State<LocalFilePage>
             context.showSnackBar('${libL10n.fail}:\n$e');
             return;
           }
-          setState(() {});
+          setStateSafe(() {});
         },
       ).toList,
     );
   }
+}
 
-  Widget _buildMissionBtn() {
-    return IconButton(
-      icon: const Icon(Icons.downloading),
-      onPressed: () => AppRoutes.sftpMission().go(context),
+extension _OnTapFile on _LocalFilePageState {
+  void _onTapEdit(FileSystemEntity file, String fileName) async {
+    context.pop();
+    final stat = await file.stat();
+    if (stat.size > Miscs.editorMaxSize) {
+      context.showRoundDialog(
+        title: libL10n.attention,
+        child: Text(l10n.fileTooLarge(fileName, stat.size, '1m')),
+      );
+      return;
+    }
+
+    await EditorPage.route.go(
+      context,
+      args: EditorPageArgs(
+        path: file.absolute.path,
+        onSave: (_) {
+          context.showSnackBar(l10n.saved);
+          setStateSafe(() {});
+        },
+        closeAfterSave: SettingStore.instance.closeAfterSave.fetch(),
+        softWrap: SettingStore.instance.editorSoftWrap.fetch(),
+        enableHighlight: SettingStore.instance.editorHighlight.fetch(),
+      ),
     );
   }
 
-  Widget _buildSortBtn() {
-    return _sortType.listenVal(
-      (value) {
-        return PopupMenuButton<_SortType>(
-          icon: const Icon(Icons.sort),
-          itemBuilder: (_) => _SortType.values.map((e) => e.menuItem).toList(),
-          onSelected: (value) {
-            _sortType.value = value;
-          },
-        );
-      },
-    );
-  }
+  void _onTapUpload(FileSystemEntity file, String fileName) async {
+    context.pop();
 
-  @override
-  bool get wantKeepAlive => true;
+    final spi = await context.showPickSingleDialog<Spi>(
+      title: libL10n.select,
+      items: ServerProvider.serverOrder.value
+          .map((e) => ServerProvider.pick(id: e)?.value.spi)
+          .whereType<Spi>()
+          .toList(),
+      display: (e) => e.name,
+    );
+    if (spi == null) return;
+
+    final args = SftpPageArgs(
+      spi: spi,
+      isSelect: true,
+    );
+    final remotePath = await SftpPage.route.go(context, args);
+    if (remotePath == null) {
+      return;
+    }
+
+    SftpProvider.add(SftpReq(
+      spi,
+      '$remotePath/$fileName',
+      file.absolute.path,
+      SftpReqType.upload,
+    ));
+    context.showSnackBar(l10n.added2List);
+  }
 }
 
 enum _SortType {
@@ -380,8 +416,7 @@ enum _SortType {
         files.sort((a, b) => a.statSync().size.compareTo(b.statSync().size));
         break;
       case _SortType.time:
-        files.sort(
-            (a, b) => a.statSync().modified.compareTo(b.statSync().modified));
+        files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
         break;
     }
     return files;

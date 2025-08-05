@@ -1,4 +1,5 @@
 import 'dart:async';
+
 // import 'dart:io';
 
 import 'package:computer/computer.dart';
@@ -6,18 +7,17 @@ import 'package:dartssh2/dartssh2.dart';
 import 'package:fl_lib/fl_lib.dart';
 import 'package:server_box/core/extension/ssh_client.dart';
 import 'package:server_box/core/sync.dart';
+import 'package:server_box/core/utils/server.dart';
 import 'package:server_box/core/utils/ssh_auth.dart';
 import 'package:server_box/data/model/app/error.dart';
 import 'package:server_box/data/model/app/shell_func.dart';
-import 'package:server_box/data/model/server/system.dart';
-import 'package:server_box/data/res/store.dart';
-
-import 'package:server_box/core/utils/server.dart';
 import 'package:server_box/data/model/server/server.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/model/server/server_status_update_req.dart';
+import 'package:server_box/data/model/server/system.dart';
 import 'package:server_box/data/model/server/try_limiter.dart';
 import 'package:server_box/data/res/status.dart';
+import 'package:server_box/data/res/store.dart';
 
 class ServerProvider extends Provider {
   const ServerProvider._();
@@ -45,22 +45,20 @@ class ServerProvider extends Provider {
     for (int idx = 0; idx < spis.length; idx++) {
       final spi = spis[idx];
       final originServer = oldServers[spi.id];
-      final newServer = genServer(spi);
 
       /// #258
       /// If not [shouldReconnect], then keep the old state.
-      if (originServer != null &&
-          !originServer.value.spi.shouldReconnect(spi)) {
-        newServer.conn = originServer.value.conn;
+      if (originServer != null && !originServer.value.spi.shouldReconnect(spi)) {
+        originServer.value.spi = spi;
+        servers[spi.id] = originServer;
+      } else {
+        final newServer = genServer(spi);
+        servers[spi.id] = newServer.vn;
       }
-      servers[spi.id] = newServer.vn;
     }
     final serverOrder_ = Stores.setting.serverOrder.fetch();
     if (serverOrder_.isNotEmpty) {
-      spis.reorder(
-        order: serverOrder_,
-        finder: (n, id) => n.id == id,
-      );
+      spis.reorder(order: serverOrder_, finder: (n, id) => n.id == id);
       serverOrder.value.addAll(spis.map((e) => e.id));
     } else {
       serverOrder.value.addAll(servers.keys);
@@ -105,31 +103,30 @@ class ServerProvider extends Provider {
 
   /// if [spi] is specificed then only refresh this server
   /// [onlyFailed] only refresh failed servers
-  static Future<void> refresh({
-    Spi? spi,
-    bool onlyFailed = false,
-  }) async {
+  static Future<void> refresh({Spi? spi, bool onlyFailed = false}) async {
     if (spi != null) {
       _manualDisconnectedIds.remove(spi.id);
       await _getData(spi);
       return;
     }
 
-    await Future.wait(servers.values.map((val) async {
-      final s = val.value;
-      if (onlyFailed) {
-        if (s.conn != ServerConn.failed) return;
-        TryLimiter.reset(s.spi.id);
-      }
+    await Future.wait(
+      servers.values.map((val) async {
+        final s = val.value;
+        if (onlyFailed) {
+          if (s.conn != ServerConn.failed) return;
+          TryLimiter.reset(s.spi.id);
+        }
 
-      if (_manualDisconnectedIds.contains(s.spi.id)) return;
+        if (_manualDisconnectedIds.contains(s.spi.id)) return;
 
-      if (s.conn == ServerConn.disconnected && !s.spi.autoConnect) {
-        return;
-      }
+        if (s.conn == ServerConn.disconnected && !s.spi.autoConnect) {
+          return;
+        }
 
-      return await _getData(s.spi);
-    }));
+        return await _getData(s.spi);
+      }),
+    );
   }
 
   static Future<void> startAutoRefresh() async {
@@ -174,12 +171,16 @@ class ServerProvider extends Provider {
 
   static void _closeOneServer(String id) {
     final s = servers[id];
-    final item = s?.value;
-    item?.client?.close();
-    item?.client = null;
-    item?.conn = ServerConn.disconnected;
+    if (s == null) {
+      Loggers.app.warning('Server with id $id not found');
+      return;
+    }
+    final item = s.value;
+    item.client?.close();
+    item.client = null;
+    item.conn = ServerConn.disconnected;
     _manualDisconnectedIds.add(id);
-    s?.notify();
+    s.notify();
   }
 
   static void addServer(Spi spi) {
@@ -208,14 +209,12 @@ class ServerProvider extends Provider {
     serverOrder.value.clear();
     serverOrder.notify();
     Stores.setting.serverOrder.put(serverOrder.value);
-    Stores.server.deleteAll();
+    Stores.server.clear();
     _updateTags();
+    bakSync.sync(milliDelay: 1000);
   }
 
-  static Future<void> updateServer(
-    Spi old,
-    Spi newSpi,
-  ) async {
+  static Future<void> updateServer(Spi old, Spi newSpi) async {
     if (old != newSpi) {
       Stores.server.update(old, newSpi);
       servers[old.id]?.value.spi = newSpi;
@@ -236,7 +235,7 @@ class ServerProvider extends Provider {
       }
     }
     _updateTags();
-    bakSync.sync();
+    bakSync.sync(milliDelay: 1000);
   }
 
   static void _setServerState(VNode<Server> s, ServerConn ss) {
@@ -306,14 +305,11 @@ class ServerProvider extends Provider {
       _setServerState(s, ServerConn.connected);
 
       try {
-        final (_, writeScriptResult) = await sv.client!.exec(
-          (session) async {
-            final scriptRaw = ShellFunc.allScript(spi.custom?.cmds).uint8List;
-            session.stdin.add(scriptRaw);
-            session.stdin.close();
-          },
-          entry: ShellFunc.getInstallShellCmd(spi.id),
-        );
+        final (_, writeScriptResult) = await sv.client!.exec((session) async {
+          final scriptRaw = ShellFunc.allScript(spi.custom?.cmds).uint8List;
+          session.stdin.add(scriptRaw);
+          session.stdin.close();
+        }, entry: ShellFunc.getInstallShellCmd(spi.id));
         if (writeScriptResult.isNotEmpty) {
           ShellFunc.switchScriptDir(spi.id);
           throw writeScriptResult;
@@ -365,10 +361,7 @@ class ServerProvider extends Provider {
           }
         }
         TryLimiter.inc(sid);
-        sv.status.err = SSHErr(
-          type: SSHErrType.segements,
-          message: 'Seperate segments failed, raw:\n$raw',
-        );
+        sv.status.err = SSHErr(type: SSHErrType.segements, message: 'Seperate segments failed, raw:\n$raw');
         _setServerState(s, ServerConn.failed);
         return;
       }
@@ -407,17 +400,10 @@ class ServerProvider extends Provider {
         system: systemType,
         customCmds: spi.custom?.cmds ?? {},
       );
-      sv.status = await Computer.shared.start(
-        getStatus,
-        req,
-        taskName: 'StatusUpdateReq<${sv.id}>',
-      );
+      sv.status = await Computer.shared.start(getStatus, req, taskName: 'StatusUpdateReq<${sv.id}>');
     } catch (e, trace) {
       TryLimiter.inc(sid);
-      sv.status.err = SSHErr(
-        type: SSHErrType.getStatus,
-        message: 'Parse failed: $e\n\n$raw',
-      );
+      sv.status.err = SSHErr(type: SSHErrType.getStatus, message: 'Parse failed: $e\n\n$raw');
       _setServerState(s, ServerConn.failed);
       Loggers.app.warning('Server status', e, trace);
       return;

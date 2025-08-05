@@ -1,42 +1,37 @@
 import 'dart:async';
 
 import 'package:fl_lib/fl_lib.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:xterm/core.dart';
 
 part 'snippet.g.dart';
+part 'snippet.freezed.dart';
 
-@JsonSerializable()
-@HiveType(typeId: 2)
-class Snippet {
-  @HiveField(0)
-  final String name;
-  @HiveField(1)
-  final String script;
-  @HiveField(2)
-  final List<String>? tags;
-  @HiveField(3)
-  final String? note;
+@freezed
+abstract class Snippet with _$Snippet {
+  const factory Snippet({
+    required String name,
+    required String script,
+    List<String>? tags,
+    String? note,
 
-  /// List of server id that this snippet should be auto run on
-  @HiveField(4)
-  final List<String>? autoRunOn;
+    /// List of server id that this snippet should be auto run on
+    List<String>? autoRunOn,
+  }) = _Snippet;
 
-  const Snippet({
-    required this.name,
-    required this.script,
-    this.tags,
-    this.note,
-    this.autoRunOn,
-  });
+  factory Snippet.fromJson(Map<String, dynamic> json) => _$SnippetFromJson(json);
 
-  factory Snippet.fromJson(Map<String, dynamic> json) =>
-      _$SnippetFromJson(json);
+  static const example = Snippet(
+    name: 'example',
+    script: 'echo hello',
+    tags: ['tag'],
+    note: 'note',
+    autoRunOn: ['server_id'],
+  );
+}
 
-  Map<String, dynamic> toJson() => _$SnippetToJson(this);
-
+extension SnippetX on Snippet {
   static final fmtFinder = RegExp(r'\$\{[^{}]+\}');
 
   String fmtWithSpi(Spi spi) {
@@ -175,14 +170,6 @@ class Snippet {
     r'${ctrl': TerminalKey.control,
     r'${alt': TerminalKey.alt,
   };
-
-  static const example = Snippet(
-    name: 'example',
-    script: 'echo hello',
-    tags: ['tag'],
-    note: 'note',
-    autoRunOn: ['server_id'],
-  );
 }
 
 class SnippetResult {

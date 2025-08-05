@@ -1,7 +1,6 @@
 import 'package:fl_lib/fl_lib.dart';
 import 'package:server_box/data/store/container.dart';
 import 'package:server_box/data/store/history.dart';
-import 'package:server_box/data/store/no_backup.dart';
 import 'package:server_box/data/store/private_key.dart';
 import 'package:server_box/data/store/server.dart';
 import 'package:server_box/data/store/setting.dart';
@@ -27,20 +26,24 @@ abstract final class Stores {
 
   static Future<void> init() async {
     await Future.wait(_allBackup.map((store) => store.init()));
-    await NoBackupStore.instance.init();
   }
 
-  static DateTime? get lastModTime {
-    DateTime? lastModTime;
+  static int get lastModTime {
+    var lastModTime = 0;
     for (final store in _allBackup) {
       final last = store.lastUpdateTs;
       if (last == null) {
         continue;
       }
-      if (lastModTime == null) {
-        lastModTime = last;
-      } else if (last.isAfter(lastModTime)) {
-        lastModTime = last;
+      var lastModTimeTs = 0;
+      for (final item in last.entries) {
+        final ts = item.value;
+        if (ts > lastModTimeTs) {
+          lastModTimeTs = ts;
+        }
+      }
+      if (lastModTimeTs > lastModTime) {
+        lastModTime = lastModTimeTs;
       }
     }
     return lastModTime;

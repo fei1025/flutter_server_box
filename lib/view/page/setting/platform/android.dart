@@ -2,13 +2,17 @@ import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/data/res/store.dart';
-import 'package:server_box/view/page/setting/platform/platform_pub.dart';
 
 class AndroidSettingsPage extends StatefulWidget {
   const AndroidSettingsPage({super.key});
 
   @override
   State<AndroidSettingsPage> createState() => _AndroidSettingsPageState();
+
+  static const route = AppRouteNoArg(
+    page: AndroidSettingsPage.new,
+    path: '/settings/android',
+  );
 }
 
 const _homeWidgetPrefPrefix = 'widget_';
@@ -17,19 +21,24 @@ class _AndroidSettingsPageState extends State<AndroidSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: Text('Android')),
+      appBar: CustomAppBar(title: const Text('Android')),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 17),
         children: [
-          _buildFgService(),
+          // _buildFgService(),
           _buildBgRun(),
           _buildAndroidWidgetSharedPreference(),
-          if (BioAuth.isPlatformSupported)
-            PlatformPublicSettings.buildBioAuth(),
         ].map((e) => CardX(child: e)).toList(),
       ),
     );
   }
+
+  // Widget _buildFgService() {
+  //   return ListTile(
+  //     title: TipText(l10n.fgService, l10n.fgServiceTip),
+  //     trailing: StoreSwitch(prop: Stores.setting.fgService),
+  //   );
+  // }
 
   Widget _buildBgRun() {
     return ListTile(
@@ -61,7 +70,7 @@ class _AndroidSettingsPageState extends State<AndroidSettingsPage> {
       trailing: const Icon(Icons.keyboard_arrow_right),
       onTap: () async {
         final data = <String, String>{};
-        final keys = await PrefStore.shared.keys();
+        final keys = PrefStore.shared.keys();
 
         for (final key in keys) {
           final val = PrefStore.shared.get<String>(key);
@@ -116,11 +125,4 @@ class _AndroidSettingsPageState extends State<AndroidSettingsPage> {
   //     },
   //   );
   // }
-
-  Widget _buildFgService() {
-    return ListTile(
-      title: TipText(l10n.fgService, l10n.fgServiceTip),
-      trailing: StoreSwitch(prop: Stores.setting.fgService),
-    );
-  }
 }

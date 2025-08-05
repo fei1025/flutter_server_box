@@ -1,103 +1,56 @@
 import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/data/res/store.dart';
 import 'package:xterm/core.dart';
 
-part 'virtual_key.g.dart';
-
 enum VirtualKeyFunc { toggleIME, backspace, clipboard, snippet, file }
 
-@HiveType(typeId: 4)
 enum VirtKey {
-  @HiveField(0)
   esc,
-  @HiveField(1)
   alt,
-  @HiveField(2)
   home,
-  @HiveField(3)
   up,
-  @HiveField(4)
   end,
-  @HiveField(5)
   sftp,
-  @HiveField(6)
   snippet,
-  @HiveField(7)
   tab,
-  @HiveField(8)
   ctrl,
-  @HiveField(9)
   left,
-  @HiveField(10)
   down,
-  @HiveField(11)
   right,
-  @HiveField(12)
   clipboard,
-  @HiveField(13)
   ime,
-  @HiveField(14)
+  shift,
   pgup,
-  @HiveField(15)
   pgdn,
-  @HiveField(16)
   slash,
-  @HiveField(17)
   backSlash,
-  @HiveField(18)
   underscore,
-  @HiveField(19)
   plus,
-  @HiveField(20)
   equal,
-  @HiveField(21)
   minus,
-  @HiveField(22)
   parenLeft,
-  @HiveField(23)
   parenRight,
-  @HiveField(24)
   bracketLeft,
-  @HiveField(25)
   bracketRight,
-  @HiveField(26)
   braceLeft,
-  @HiveField(27)
   braceRight,
-  @HiveField(28)
   chevronLeft,
-  @HiveField(29)
   chevronRight,
-  @HiveField(30)
   colon,
-  @HiveField(31)
   semicolon,
-  @HiveField(32)
   f1,
-  @HiveField(33)
   f2,
-  @HiveField(34)
   f3,
-  @HiveField(35)
   f4,
-  @HiveField(36)
   f5,
-  @HiveField(37)
   f6,
-  @HiveField(38)
   f7,
-  @HiveField(39)
   f8,
-  @HiveField(40)
   f9,
-  @HiveField(41)
   f10,
-  @HiveField(42)
   f11,
-  @HiveField(43)
   f12;
 }
 
@@ -153,6 +106,7 @@ extension VirtKeyX on VirtKey {
     VirtKey.right,
     VirtKey.clipboard,
     VirtKey.ime,
+    VirtKey.shift,
   ];
 
   /// Corresponding [TerminalKey]
@@ -167,6 +121,7 @@ extension VirtKeyX on VirtKey {
         VirtKey.left => TerminalKey.arrowLeft,
         VirtKey.down => TerminalKey.arrowDown,
         VirtKey.right => TerminalKey.arrowRight,
+        VirtKey.shift => TerminalKey.shift,
         VirtKey.pgup => TerminalKey.pageUp,
         VirtKey.pgdn => TerminalKey.pageDown,
         VirtKey.f1 => TerminalKey.f1,
@@ -209,7 +164,7 @@ extension VirtKeyX on VirtKey {
       };
 
   bool get toggleable => switch (this) {
-        VirtKey.alt || VirtKey.ctrl => true,
+        VirtKey.alt || VirtKey.ctrl || VirtKey.shift => true,
         _ => false,
       };
 

@@ -85,14 +85,19 @@ android {
         }
 
         debug {
-            applicationIdSuffix '.debug'
-            resValue "string", "app_name", "SrvBxD"
+            // No applicationIdSuffix or resValue here
         }
 
         profile {
-            applicationIdSuffix '.debug'
-            resValue "string", "app_name", "SrvBxP"
+            // No applicationIdSuffix or resValue here
         }
+    }
+
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles.
+        includeInBundle = false
     }
 }
 

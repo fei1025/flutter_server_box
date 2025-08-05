@@ -1,10 +1,12 @@
 import 'package:dartssh2/dartssh2.dart';
-import 'package:server_box/data/model/app/error.dart';
+import 'package:fl_lib/fl_lib.dart';
 import 'package:server_box/data/model/app/shell_func.dart';
+import 'package:server_box/data/model/server/amd.dart';
 import 'package:server_box/data/model/server/battery.dart';
 import 'package:server_box/data/model/server/conn.dart';
 import 'package:server_box/data/model/server/cpu.dart';
 import 'package:server_box/data/model/server/disk.dart';
+import 'package:server_box/data/model/server/disk_smart.dart';
 import 'package:server_box/data/model/server/memory.dart';
 import 'package:server_box/data/model/server/net_speed.dart';
 import 'package:server_box/data/model/server/nvdia.dart';
@@ -19,12 +21,7 @@ class Server {
   SSHClient? client;
   ServerConn conn;
 
-  Server(
-    this.spi,
-    this.status,
-    this.conn, {
-    this.client,
-  });
+  Server(this.spi, this.status, this.conn, {this.client});
 
   bool get needGenClient => conn < ServerConn.connecting;
 
@@ -44,7 +41,9 @@ class ServerStatus {
   SystemType system;
   Err? err;
   DiskIO diskIO;
+  List<DiskSmart> diskSmart;
   List<NvidiaSmiItem>? nvidia;
+  List<AmdSmiItem>? amd;
   final List<Battery> batteries = [];
   final Map<StatusCmdType, String> more = {};
   final List<SensorItem> sensors = [];
@@ -61,6 +60,7 @@ class ServerStatus {
     required this.temps,
     required this.system,
     required this.diskIO,
+    this.diskSmart = const [],
     this.err,
     this.nvidia,
     this.diskUsage,

@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/core/extension/sftpfile.dart';
-import 'package:server_box/core/route.dart';
 import 'package:server_box/core/utils/comparator.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/model/sftp/browser_status.dart';
@@ -14,33 +14,35 @@ import 'package:server_box/data/model/sftp/worker.dart';
 import 'package:server_box/data/provider/sftp.dart';
 import 'package:server_box/data/res/misc.dart';
 import 'package:server_box/data/res/store.dart';
-import 'package:server_box/view/page/editor.dart';
+import 'package:server_box/data/store/setting.dart';
+import 'package:server_box/view/page/ssh/page/page.dart';
 import 'package:server_box/view/page/storage/local.dart';
+import 'package:server_box/view/page/storage/sftp_mission.dart';
 import 'package:server_box/view/widget/omit_start_text.dart';
-import 'package:server_box/view/widget/two_line_text.dart';
 import 'package:server_box/view/widget/unix_perm.dart';
 
-import 'package:icons_plus/icons_plus.dart';
+final class SftpPageArgs {
+  final Spi spi;
+  final bool isSelect;
+  final String? initPath;
+
+  const SftpPageArgs({required this.spi, this.isSelect = false, this.initPath});
+}
 
 class SftpPage extends StatefulWidget {
-  final Spi spi;
-  final String? initPath;
-  final bool isSelect;
+  final SftpPageArgs args;
 
-  const SftpPage({
-    super.key,
-    required this.spi,
-    required this.isSelect,
-    this.initPath,
-  });
+  const SftpPage({super.key, required this.args});
 
   @override
   State<SftpPage> createState() => _SftpPageState();
+
+  static const route = AppRouteArg<String, SftpPageArgs>(page: SftpPage.new, path: '/sftp');
 }
 
 class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
   late final _status = SftpBrowserStatus(_client);
-  late final _client = widget.spi.server!.value.client!;
+  late final _client = widget.args.spi.server!.value.client!;
   final _sortOption = _SortOption().vn;
 
   @override
@@ -52,83 +54,80 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
   @override
   Widget build(BuildContext context) {
     final children = [
-      Btn.icon(
-        icon: const Icon(Icons.downloading),
-        onTap: () => AppRoutes.sftpMission().go(context),
-      ),
+      Btn.icon(icon: const Icon(Icons.downloading), onTap: () => SftpMissionPage.route.go(context)),
       _buildSortMenu(),
       _buildSearchBtn(),
     ];
     if (isDesktop) children.add(_buildRefreshBtn());
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: TwoLineText(up: 'SFTP', down: widget.spi.name),
-        actions: children,
-      ),
+      appBar: CustomAppBar(title: Text(widget.args.spi.name), actions: children),
       body: _buildFileView(),
       bottomNavigationBar: _buildBottom(),
     );
   }
 
+  @override
+  FutureOr<void> afterFirstLayout(BuildContext context) {
+    var initPath = '/';
+    if (Stores.setting.sftpOpenLastPath.fetch()) {
+      final history = Stores.history.sftpLastPath.fetch(widget.args.spi.id);
+      if (history != null) {
+        initPath = history;
+      }
+    }
+
+    _status.path.path = widget.args.initPath ?? initPath;
+    _listDir();
+  }
+}
+
+extension _UI on _SftpPageState {
   Widget _buildSortMenu() {
     final options = [
       (_SortType.name, libL10n.name),
       (_SortType.size, l10n.size),
       (_SortType.time, l10n.time),
     ];
-    return ValBuilder(
-      listenable: _sortOption,
-      builder: (value) {
-        return PopupMenuButton<_SortType>(
-          icon: const Icon(Icons.sort),
-          itemBuilder: (context) {
-            return options.map((r) {
-              final (type, name) = r;
-              final selected = type == value.sortBy;
-              final title =
-                  selected ? "$name (${value.reversed ? '-' : '+'})" : name;
-              return PopupMenuItem(
-                value: type,
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: selected ? UIs.primaryColor : null,
-                    fontWeight: selected ? FontWeight.bold : null,
-                  ),
+    return _sortOption.listenVal((value) {
+      return PopupMenuButton<_SortType>(
+        icon: const Icon(Icons.sort),
+        itemBuilder: (context) {
+          return options.map((r) {
+            final (type, name) = r;
+            final selected = type == value.sortBy;
+            final title = selected ? "$name (${value.reversed ? '-' : '+'})" : name;
+            return PopupMenuItem(
+              value: type,
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: selected ? UIs.primaryColor : null,
+                  fontWeight: selected ? FontWeight.bold : null,
                 ),
-              );
-            }).toList();
-          },
-          onSelected: (sortBy) {
-            final old = _sortOption.value;
-            if (old.sortBy == sortBy) {
-              _sortOption.value = old.copyWith(reversed: !old.reversed);
-            } else {
-              _sortOption.value = old.copyWith(sortBy: sortBy);
-            }
-          },
-        );
-      },
-    );
+              ),
+            );
+          }).toList();
+        },
+        onSelected: (sortBy) {
+          final old = _sortOption.value;
+          if (old.sortBy == sortBy) {
+            _sortOption.value = old.copyWith(reversed: !old.reversed);
+          } else {
+            _sortOption.value = old.copyWith(sortBy: sortBy);
+          }
+        },
+      );
+    });
   }
 
   Widget _buildBottom() {
-    final children = widget.isSelect
+    final children = widget.args.isSelect
         ? [
-            IconButton(
-              onPressed: () => context.pop(_status.path.path),
-              icon: const Icon(Icons.done),
-            ),
+            IconButton(onPressed: () => context.pop(_status.path.path), icon: const Icon(Icons.done)),
             _buildSearchBtn(),
           ]
-        : [
-            _buildBackBtn(),
-            _buildHomeBtn(),
-            _buildAddBtn(),
-            _buildGotoBtn(),
-            _buildUploadBtn(),
-          ];
+        : [_buildBackBtn(), _buildHomeBtn(), _buildAddBtn(), _buildGotoBtn(), _buildUploadBtn()];
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.fromLTRB(11, 7, 11, 11),
@@ -136,10 +135,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
           mainAxisSize: MainAxisSize.min,
           children: [
             OmitStartText(_status.path.path),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: children,
-            )
+            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: children),
           ],
         ),
       ),
@@ -152,14 +148,11 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
     return RefreshIndicator(
       onRefresh: _listDir,
       child: FadeIn(
-        key: Key(widget.spi.name + _status.path.path),
+        key: Key(widget.args.spi.name + _status.path.path),
         child: ValBuilder(
           listenable: _sortOption,
           builder: (sortOption) {
-            final files = sortOption.sortBy.sort(
-              _status.files,
-              reversed: sortOption.reversed,
-            );
+            final files = sortOption.sortBy.sort(_status.files, reversed: sortOption.reversed);
             return ListView.builder(
               itemCount: files.length,
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
@@ -183,12 +176,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
         leading: Icon(isDir ? Icons.folder_outlined : Icons.insert_drive_file),
         title: Text(file.filename),
         trailing: trailing,
-        subtitle: isDir
-            ? null
-            : Text(
-                (file.attr.size ?? 0).bytes2Str,
-                style: UIs.textGrey,
-              ),
+        subtitle: isDir ? null : Text((file.attr.size ?? 0).bytes2Str, style: UIs.textGrey),
         onTap: () {
           beforeTap?.call();
           if (isDir) {
@@ -205,19 +193,13 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
       ),
     );
   }
+}
 
+extension _Actions on _SftpPageState {
   void _onItemPress(SftpName file, bool notDir) {
     final children = [
-      ListTile(
-        leading: const Icon(Icons.delete),
-        title: Text(libL10n.delete),
-        onTap: () => _delete(file),
-      ),
-      ListTile(
-        leading: const Icon(Icons.abc),
-        title: Text(libL10n.rename),
-        onTap: () => _rename(file),
-      ),
+      ListTile(leading: const Icon(Icons.delete), title: Text(libL10n.delete), onTap: () => _delete(file)),
+      ListTile(leading: const Icon(Icons.abc), title: Text(libL10n.rename), onTap: () => _rename(file)),
       ListTile(
         leading: const Icon(MingCute.copy_line),
         title: Text(l10n.copyPath),
@@ -242,21 +224,19 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
 
           final permStr = newPerm.perm;
           if (ok == true && permStr != perm.perm) {
-            await context.showLoadingDialog(fn: () async {
-              await _client.run('chmod $permStr "${_getRemotePath(file)}"');
-              await _listDir();
-            });
+            await context.showLoadingDialog(
+              fn: () async {
+                await _client.run('chmod $permStr "${_getRemotePath(file)}"');
+                await _listDir();
+              },
+            );
           }
         },
       ),
     ];
     if (notDir) {
       children.addAll([
-        ListTile(
-          leading: const Icon(Icons.edit),
-          title: Text(libL10n.edit),
-          onTap: () => _edit(file),
-        ),
+        ListTile(leading: const Icon(Icons.edit), title: Text(libL10n.edit), onTap: () => _edit(file)),
         ListTile(
           leading: const Icon(Icons.download),
           title: Text(libL10n.download),
@@ -272,10 +252,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
       ]);
     }
     context.showRoundDialog(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 
@@ -287,49 +264,39 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
     if (editor.isNotEmpty) {
       // Use single quote to avoid escape
       final cmd = "$editor '${_getRemotePath(name)}'";
-      await AppRoutes.ssh(spi: widget.spi, initCmd: cmd).go(context);
+      final args = SshPageArgs(spi: widget.args.spi, initCmd: cmd);
+      await SSHPage.route.go(context, args);
       await _listDir();
       return;
     }
 
     final size = name.attr.size;
     if (size == null || size > Miscs.editorMaxSize) {
-      context.showSnackBar(l10n.fileTooLarge(
-        name.filename,
-        size ?? 0,
-        Miscs.editorMaxSize,
-      ));
+      context.showSnackBar(l10n.fileTooLarge(name.filename, size ?? 0, Miscs.editorMaxSize));
       return;
     }
 
     final remotePath = _getRemotePath(name);
     final localPath = _getLocalPath(remotePath);
     final completer = Completer();
-    final req = SftpReq(
-      widget.spi,
-      remotePath,
-      localPath,
-      SftpReqType.download,
-    );
+    final req = SftpReq(widget.args.spi, remotePath, localPath, SftpReqType.download);
     SftpProvider.add(req, completer: completer);
-    final (suc, err) = await context.showLoadingDialog(
-      fn: () => completer.future,
-    );
+    final (suc, err) = await context.showLoadingDialog(fn: () => completer.future);
     if (suc == null || err != null) return;
 
-    final ret = await EditorPage.route.go(
+    await EditorPage.route.go(
       context,
-      args: EditorPageArgs(path: localPath),
+      args: EditorPageArgs(
+        path: localPath,
+        onSave: (_) {
+          SftpProvider.add(SftpReq(req.spi, remotePath, localPath, SftpReqType.upload));
+          context.showSnackBar(l10n.added2List);
+        },
+        closeAfterSave: SettingStore.instance.closeAfterSave.fetch(),
+        softWrap: SettingStore.instance.editorSoftWrap.fetch(),
+        enableHighlight: SettingStore.instance.editorHighlight.fetch(),
+      ),
     );
-    if (ret?.editExistedOk == true) {
-      SftpProvider.add(SftpReq(
-        req.spi,
-        remotePath,
-        localPath,
-        SftpReqType.upload,
-      ));
-      context.showSnackBar(l10n.added2List);
-    }
   }
 
   void _download(SftpName name) {
@@ -337,28 +304,20 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
       title: libL10n.attention,
       child: Text('${l10n.dl2Local(name.filename)}\n${l10n.keepForeground}'),
       actions: [
-        TextButton(
-          onPressed: () => context.pop(),
-          child: Text(libL10n.cancel),
-        ),
+        TextButton(onPressed: () => context.pop(), child: Text(libL10n.cancel)),
         TextButton(
           onPressed: () async {
             context.pop();
             final remotePath = _getRemotePath(name);
 
             SftpProvider.add(
-              SftpReq(
-                widget.spi,
-                remotePath,
-                _getLocalPath(remotePath),
-                SftpReqType.download,
-              ),
+              SftpReq(widget.args.spi, remotePath, _getLocalPath(remotePath), SftpReqType.download),
             );
 
             context.pop();
           },
           child: Text(libL10n.download),
-        )
+        ),
       ],
     );
   }
@@ -382,9 +341,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            title: Text(text),
-          ),
+          ListTile(title: Text(text)),
           if (!useRmr)
             StatefulBuilder(
               builder: (_, setState) {
@@ -402,10 +359,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
         ],
       ),
       actions: [
-        TextButton(
-          onPressed: () => context.pop(),
-          child: Text(libL10n.cancel),
-        ),
+        TextButton(onPressed: () => context.pop(), child: Text(libL10n.cancel)),
         TextButton(
           onPressed: () async {
             context.pop();
@@ -440,10 +394,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
     void onSubmitted() async {
       final text = textController.text.trim();
       if (text.isEmpty) {
-        context.showRoundDialog(
-          child: Text(libL10n.empty),
-          actions: Btnx.oks,
-        );
+        context.showRoundDialog(child: Text(libL10n.empty), actions: Btnx.oks);
         return;
       }
       context.pop();
@@ -470,10 +421,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
         suggestion: true,
         onSubmitted: (_) => onSubmitted(),
       ),
-      actions: Btn.ok(
-        onTap: onSubmitted,
-        red: true,
-      ).toList,
+      actions: Btn.ok(onTap: onSubmitted, red: true).toList,
     );
   }
 
@@ -484,11 +432,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
     void onSubmitted() async {
       final text = textController.text.trim();
       if (text.isEmpty) {
-        context.showRoundDialog(
-          title: libL10n.attention,
-          child: Text(libL10n.empty),
-          actions: Btnx.oks,
-        );
+        context.showRoundDialog(title: libL10n.attention, child: Text(libL10n.empty), actions: Btnx.oks);
         return;
       }
       context.pop();
@@ -526,11 +470,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
     void onSubmitted() async {
       final text = textController.text.trim();
       if (text.isEmpty) {
-        context.showRoundDialog(
-          title: libL10n.attention,
-          child: Text(libL10n.empty),
-          actions: Btnx.oks,
-        );
+        context.showRoundDialog(title: libL10n.attention, child: Text(libL10n.empty), actions: Btnx.oks);
         return;
       }
       context.pop();
@@ -584,7 +524,8 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
     );
     if (confirm != true) return;
 
-    await AppRoutes.ssh(spi: widget.spi, initCmd: cmd).go(context);
+    final args = SshPageArgs(spi: widget.args.spi, initCmd: cmd);
+    await SSHPage.route.go(context, args);
     _listDir();
   }
 
@@ -596,7 +537,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
 
   /// Local file dir + server id + remote path
   String _getLocalPath(String remotePath) {
-    return Paths.file.joinPath(widget.spi.id).joinPath(remotePath);
+    return Paths.file.joinPath(widget.args.spi.oldId).joinPath(remotePath);
   }
 
   /// Only return true if the path is changed
@@ -618,12 +559,11 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
           fs.removeAt(0);
         }
 
-        if (fs.isNotEmpty &&
-            fs.firstOrNull?.filename == '..' &&
-            _status.path.path == '/') {
+        if (fs.isNotEmpty && fs.firstOrNull?.filename == '..' && _status.path.path == '/') {
           fs.removeAt(0);
         }
         if (mounted) {
+          // ignore: invalid_use_of_protected_member
           setState(() {
             _status.files
               ..clear()
@@ -632,7 +572,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
 
           // Only update history when success
           if (Stores.setting.sftpOpenLastPath.fetch()) {
-            Stores.history.sftpLastPath.put(widget.spi.id, listPath);
+            Stores.history.sftpLastPath.put(widget.args.spi.id, listPath);
           }
 
           return true;
@@ -651,10 +591,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
   }
 
   Widget _buildBackBtn() {
-    return Btn.icon(
-      onTap: _backward,
-      icon: const Icon(Icons.arrow_back),
-    );
+    return Btn.icon(onTap: _backward, icon: const Icon(Icons.arrow_back));
   }
 
   Widget _buildSearchBtn() {
@@ -684,26 +621,16 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
     return Btn.icon(
       onTap: () async {
         final idx = await context.showRoundDialog(
-            child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Btn.tile(
-              icon: const Icon(Icons.open_in_new),
-              text: l10n.system,
-              onTap: () => context.pop(1),
-            ),
-            Btn.tile(
-              icon: const Icon(Icons.folder),
-              text: l10n.inner,
-              onTap: () => context.pop(0),
-            ),
-          ],
-        ));
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Btn.tile(icon: const Icon(Icons.open_in_new), text: l10n.system, onTap: () => context.pop(1)),
+              Btn.tile(icon: const Icon(Icons.folder), text: l10n.inner, onTap: () => context.pop(0)),
+            ],
+          ),
+        );
         final path = switch (idx) {
-          0 => await LocalFilePage.route.go(
-              context,
-              args: const LocalFilePageArgs(isPickFile: true),
-            ),
+          0 => await LocalFilePage.route.go(context, args: const LocalFilePageArgs(isPickFile: true)),
           1 => await Pfs.pickFilePath(),
           _ => null,
         };
@@ -713,9 +640,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
         final fileName = path.split(Platform.pathSeparator).lastOrNull;
         final remotePath = '$remoteDir/$fileName';
         Loggers.app.info('SFTP upload local: $path, remote: $remotePath');
-        SftpProvider.add(
-          SftpReq(widget.spi, remotePath, path, SftpReqType.upload),
-        );
+        SftpProvider.add(SftpReq(widget.args.spi, remotePath, path, SftpReqType.upload));
       },
       icon: const Icon(Icons.upload_file),
     );
@@ -727,16 +652,8 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Btn.tile(
-              icon: const Icon(Icons.folder),
-              text: libL10n.folder,
-              onTap: _mkdir,
-            ),
-            Btn.tile(
-              icon: const Icon(Icons.insert_drive_file),
-              text: libL10n.file,
-              onTap: _newFile,
-            ),
+            Btn.tile(icon: const Icon(Icons.folder), text: libL10n.folder, onTap: _mkdir),
+            Btn.tile(icon: const Icon(Icons.insert_drive_file), text: libL10n.file, onTap: _newFile),
           ],
         ),
       ),
@@ -754,11 +671,9 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
               if (!Stores.setting.recordHistory.fetch()) {
                 return [];
               }
-              return Stores.history.sftpGoPath.all.cast<String>().where(
-                    (element) => element.contains(val.text),
-                  );
+              return Stores.history.sftpGoPath.all.cast<String>().where((e) => e.contains(val.text));
             },
-            fieldViewBuilder: (_, controller, node, __) {
+            fieldViewBuilder: (_, controller, node, _) {
               return Input(
                 autoFocus: true,
                 icon: Icons.abc,
@@ -787,35 +702,18 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
   }
 
   Widget _buildRefreshBtn() {
-    return Btn.icon(
-      onTap: _listDir,
-      icon: const Icon(Icons.refresh),
-    );
+    return Btn.icon(onTap: _listDir, icon: const Icon(Icons.refresh));
   }
 
   Widget _buildHomeBtn() {
     return IconButton(
       onPressed: () {
-        final user = widget.spi.user;
+        final user = widget.args.spi.user;
         _status.path.path = user != 'root' ? '/home/$user' : '/root';
         _listDir();
       },
       icon: const Icon(Icons.home),
     );
-  }
-
-  @override
-  FutureOr<void> afterFirstLayout(BuildContext context) {
-    var initPath = '/';
-    if (Stores.setting.sftpOpenLastPath.fetch()) {
-      final history = Stores.history.sftpLastPath.fetch(widget.spi.id);
-      if (history != null) {
-        initPath = history;
-      }
-    }
-
-    _status.path.path = widget.initPath ?? initPath;
-    _listDir();
   }
 }
 
@@ -887,16 +785,13 @@ const _extCmdMap = {
 
 /// Return fmt: 2021-01-01 00:00:00
 String _getTime(int? unixMill) {
-  return DateTime.fromMillisecondsSinceEpoch((unixMill ?? 0) * 1000)
-      .toString()
-      .replaceFirst('.000', '');
+  return DateTime.fromMillisecondsSinceEpoch((unixMill ?? 0) * 1000).toString().replaceFirst('.000', '');
 }
 
 enum _SortType {
   name,
   time,
-  size,
-  ;
+  size;
 
   List<SftpName> sort(List<SftpName> files, {bool reversed = false}) {
     var comparator = ChainComparator<SftpName>.create();
@@ -908,32 +803,17 @@ enum _SortType {
         files.sort(
           comparator
               .thenWithComparator(
-                (a, b) => Comparators.compareStringCaseInsensitive()(
-                    a.filename, b.filename),
+                (a, b) => Comparators.compareStringCaseInsensitive()(a.filename, b.filename),
                 reversed: reversed,
               )
               .compare,
         );
         break;
       case _SortType.time:
-        files.sort(
-          comparator
-              .thenCompareBy<num>(
-                (x) => x.attr.modifyTime ?? 0,
-                reversed: reversed,
-              )
-              .compare,
-        );
+        files.sort(comparator.thenCompareBy<num>((x) => x.attr.modifyTime ?? 0, reversed: reversed).compare);
         break;
       case _SortType.size:
-        files.sort(
-          comparator
-              .thenCompareBy<num>(
-                (x) => x.attr.size ?? 0,
-                reversed: reversed,
-              )
-              .compare,
-        );
+        files.sort(comparator.thenCompareBy<num>((x) => x.attr.size ?? 0, reversed: reversed).compare);
         break;
     }
     return files;
@@ -946,13 +826,7 @@ class _SortOption {
 
   _SortOption({this.sortBy = _SortType.name, this.reversed = false});
 
-  _SortOption copyWith({
-    _SortType? sortBy,
-    bool? reversed,
-  }) {
-    return _SortOption(
-      sortBy: sortBy ?? this.sortBy,
-      reversed: reversed ?? this.reversed,
-    );
+  _SortOption copyWith({_SortType? sortBy, bool? reversed}) {
+    return _SortOption(sortBy: sortBy ?? this.sortBy, reversed: reversed ?? this.reversed);
   }
 }

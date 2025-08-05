@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'l10n.dart';
 
 // ignore_for_file: type=lint
@@ -13,7 +15,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get acceptBeta => 'Прийняти оновлення бета-версії';
 
   @override
-  String get addSystemPrivateKeyTip => 'Наразі приватних ключів нема, хочете додати той, що йде з системою (~/.ssh/id_rsa)?';
+  String get addSystemPrivateKeyTip =>
+      'Наразі приватних ключів нема, хочете додати той, що йде з системою (~/.ssh/id_rsa)?';
 
   @override
   String get added2List => 'Додано до списку завдань';
@@ -25,10 +28,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get alreadyLastDir => 'Вже в останньому каталозі.';
 
   @override
-  String get authFailTip => 'Авторизація не вдалася, будь ласка, перевірте правильність облікових даних';
+  String get authFailTip =>
+      'Авторизація не вдалася, будь ласка, перевірте правильність облікових даних';
 
   @override
-  String get autoBackupConflict => 'Тільки одне автоматичне резервне копіювання може бути активне одночасно.';
+  String get autoBackupConflict =>
+      'Тільки одне автоматичне резервне копіювання може бути активне одночасно.';
 
   @override
   String get autoConnect => 'Авто підключення';
@@ -37,13 +42,38 @@ class AppLocalizationsUk extends AppLocalizations {
   String get autoRun => 'Авто запуск';
 
   @override
-  String get autoUpdateHomeWidget => 'Автоматичне оновлення віджетів на головному екрані';
+  String get autoUpdateHomeWidget =>
+      'Автоматичне оновлення віджетів на головному екрані';
 
   @override
-  String get backupTip => 'Експортовані дані слабо зашифровані. \nБудь ласка, зберігайте їх у безпеці.';
+  String get backupTip =>
+      'Експортовані дані можуть бути зашифровані паролем. \nБудь ласка, зберігайте їх у безпеці.';
 
   @override
-  String get backupVersionNotMatch => 'Версія резервного копіювання не збіглася.';
+  String get backupVersionNotMatch =>
+      'Версія резервного копіювання не збіглася.';
+
+  @override
+  String get backupPassword => 'Пароль резервного копіювання';
+
+  @override
+  String get backupPasswordTip =>
+      'Встановіть пароль для шифрування файлів резервного копіювання. Залиште порожнім для відключення шифрування.';
+
+  @override
+  String get backupPasswordWrong => 'Неправильний пароль резервного копіювання';
+
+  @override
+  String get backupEncrypted => 'Резервна копія зашифрована';
+
+  @override
+  String get backupNotEncrypted => 'Резервна копія не зашифрована';
+
+  @override
+  String get backupPasswordSet => 'Пароль резервного копіювання встановлено';
+
+  @override
+  String get backupPasswordRemoved => 'Пароль резервного копіювання видалено';
 
   @override
   String get battery => 'Акумулятор';
@@ -52,13 +82,18 @@ class AppLocalizationsUk extends AppLocalizations {
   String get bgRun => 'Запуск у фоновому режимі';
 
   @override
-  String get bgRunTip => 'Цей перемикач лише вказує на те, що програма намагатиметься працювати у фоновому режимі. Чи може вона працювати у фоновому режимі, залежить від прав доступу. Для AOSP-орієнтованих Android ROM, будь ласка, вимкніть \"Оптимізацію акумулятора\" в цьому додатку. Для MIUI / HyperOS, будь ласка, змініть політику економії енергії на \"Нескінченна\".';
+  String get bgRunTip =>
+      'Цей перемикач лише вказує на те, що програма намагатиметься працювати у фоновому режимі. Чи може вона працювати у фоновому режимі, залежить від прав доступу. Для AOSP-орієнтованих Android ROM, будь ласка, вимкніть \"Оптимізацію акумулятора\" в цьому додатку. Для MIUI / HyperOS, будь ласка, змініть політику економії енергії на \"Нескінченна\".';
+
+  @override
+  String get closeAfterSave => 'Зберегти та закрити';
 
   @override
   String get cmd => 'Команда';
 
   @override
-  String get collapseUITip => 'Сховати довгі списки, що є у UI за замовчуванням';
+  String get collapseUITip =>
+      'Сховати довгі списки, що є у UI за замовчуванням';
 
   @override
   String get conn => 'З\'єднання';
@@ -67,7 +102,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get container => 'Контейнер';
 
   @override
-  String get containerTrySudoTip => 'Наприклад: У застосунку користувач це aaa, але Docker встановлений під користувачем root. У цьому випадку вам потрібно активувати цю опцію.';
+  String get containerTrySudoTip =>
+      'Наприклад: У застосунку користувач це aaa, але Docker встановлений під користувачем root. У цьому випадку вам потрібно активувати цю опцію.';
 
   @override
   String get convert => 'Конвертувати';
@@ -76,7 +112,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get copyPath => 'Скопіювати шлях';
 
   @override
-  String get cpuViewAsProgressTip => 'Відобразити використання кожного процесора у вигляді стовпчикової діаграми (старий стиль)';
+  String get cpuViewAsProgressTip =>
+      'Відобразити використання кожного процесора у вигляді стовпчикової діаграми (старий стиль)';
 
   @override
   String get cursorType => 'Тип курсора';
@@ -85,7 +122,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get customCmd => 'Користувацькі команди';
 
   @override
-  String get customCmdDocUrl => 'https://github.com/lollipopkit/flutter_server_box/wiki#custom-commands';
+  String get customCmdDocUrl =>
+      'https://github.com/lollipopkit/flutter_server_box/wiki#custom-commands';
 
   @override
   String get customCmdHint => '\"Ім\'я Команди\": \"Команда\"';
@@ -100,6 +138,10 @@ class AppLocalizationsUk extends AppLocalizations {
   String get deleteServers => 'Масове видалення серверів';
 
   @override
+  String get desktopTerminalTip =>
+      'Команда для відкриття емулятора термінала під час запуску SSH-сеансів.';
+
+  @override
   String get dirEmpty => 'Переконайтеся, що директорія пуста.';
 
   @override
@@ -107,6 +149,9 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get disk => 'Диск';
+
+  @override
+  String get diskHealth => 'Стан диска';
 
   @override
   String get diskIgnorePath => 'Ігнорувати шлях для диска';
@@ -120,7 +165,8 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
-  String get dockerEmptyRunningItems => 'Немає запущених контейнерів.\nЦе може бути через:\n- Користувача Docker, відмінного від користувача, налаштованого в додатку\n- змінну оточення DOCKER_HOST, яка не була правильно зчитана. Ви можете виконати `echo \$DOCKER_HOST` у терміналі, щоб побачити її значення.';
+  String get dockerEmptyRunningItems =>
+      'Немає запущених контейнерів.\nЦе може бути через:\n- Користувача Docker, відмінного від користувача, налаштованого в додатку\n- змінну оточення DOCKER_HOST, яка не була правильно зчитана. Ви можете виконати `echo \$DOCKER_HOST` у терміналі, щоб побачити її значення.';
 
   @override
   String dockerImagesFmt(Object count) {
@@ -131,7 +177,10 @@ class AppLocalizationsUk extends AppLocalizations {
   String get dockerNotInstalled => 'Docker не встановлено';
 
   @override
-  String dockerStatusRunningAndStoppedFmt(Object runningCount, Object stoppedCount) {
+  String dockerStatusRunningAndStoppedFmt(
+    Object runningCount,
+    Object stoppedCount,
+  ) {
     return '$runningCount запущено, $stoppedCount контейнерів зупинено.';
   }
 
@@ -144,7 +193,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get doubleColumnMode => 'Режим подвійної колонки';
 
   @override
-  String get doubleColumnTip => 'Ця опція лише активує функцію, чи можна її насправді включити, залежить від ширини пристрою';
+  String get doubleColumnTip =>
+      'Ця опція лише активує функцію, чи можна її насправді включити, залежить від ширини пристрою';
 
   @override
   String get editVirtKeys => 'Редагувати віртуальні клавіші';
@@ -153,7 +203,11 @@ class AppLocalizationsUk extends AppLocalizations {
   String get editor => 'Редактор';
 
   @override
-  String get editorHighlightTip => 'Поточна підсвітка коду не ідеальна і може бути вимкнена для покращення.';
+  String get editorHighlightTip =>
+      'Поточна підсвітка коду не ідеальна і може бути вимкнена для покращення.';
+
+  @override
+  String get emulator => 'Емулятор';
 
   @override
   String get encode => 'Кодувати';
@@ -171,13 +225,15 @@ class AppLocalizationsUk extends AppLocalizations {
   String get fallbackSshDest => 'Резервна SSH адреса';
 
   @override
-  String get fdroidReleaseTip => 'Якщо ви завантажили цей застосунок з F-Droid, рекомендується відключити цю опцію.';
+  String get fdroidReleaseTip =>
+      'Якщо ви завантажили цей застосунок з F-Droid, рекомендується відключити цю опцію.';
 
   @override
   String get fgService => 'Служба переднього плану';
 
   @override
-  String get fgServiceTip => 'Після увімкнення деякі моделі пристроїв можуть вилітати. Вимкнення може призвести до того, що деякі моделі не зможуть підтримувати SSH-з\'єднання у фоновому режимі. Будь ласка, дозвольте ServerBox права на сповіщення, фонову роботу та самопробудження в системних налаштуваннях.';
+  String get fgServiceTip =>
+      'Після увімкнення деякі моделі пристроїв можуть вилітати. Вимкнення може призвести до того, що деякі моделі не зможуть підтримувати SSH-з\'єднання у фоновому режимі. Будь ласка, дозвольте ServerBox права на сповіщення, фонову роботу та самопробудження в системних налаштуваннях.';
 
   @override
   String fileTooLarge(Object file, Object size, Object sizeMax) {
@@ -206,7 +262,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get fullScreenJitterHelp => 'Щоб уникнути вигоряння екрану';
 
   @override
-  String get fullScreenTip => 'Чи слід увімкнути повноекранний режим під час повороту пристрою в горизонтальне положення? Ця опція стосується лише вкладки сервера.';
+  String get fullScreenTip =>
+      'Чи слід увімкнути повноекранний режим під час повороту пристрою в горизонтальне положення? Ця опція стосується лише вкладки сервера.';
 
   @override
   String get goBackQ => 'Повернутися назад?';
@@ -221,7 +278,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get highlight => 'Підсвітка коду';
 
   @override
-  String get homeWidgetUrlConfig => 'Налаштувати URL віджета на головному екрані';
+  String get homeWidgetUrlConfig =>
+      'Налаштувати URL віджета на головному екрані';
 
   @override
   String get host => 'Хост';
@@ -250,7 +308,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get install => 'Встановити';
 
   @override
-  String get installDockerWithUrl => 'Будь ласка, спочатку встановіть Docker. (https://docs.docker.com/engine/install)';
+  String get installDockerWithUrl =>
+      'Будь ласка, спочатку встановіть Docker. (https://docs.docker.com/engine/install)';
 
   @override
   String get invalid => 'Недійсний';
@@ -265,7 +324,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get keepStatusWhenErr => 'Зберегати останній стан сервера';
 
   @override
-  String get keepStatusWhenErrTip => 'Тільки в разі виникнення помилки під час виконання скрипту';
+  String get keepStatusWhenErrTip =>
+      'Тільки в разі виникнення помилки під час виконання скрипту';
 
   @override
   String get keyAuth => 'Аутентифікація ключем';
@@ -274,7 +334,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get letterCache => 'Кешування букв';
 
   @override
-  String get letterCacheTip => 'Рекомендується відключити, але після вимкнення стане неможливим введення CJK (китайських, японських, корейських) символів.';
+  String get letterCacheTip =>
+      'Рекомендується відключити, але після вимкнення стане неможливим введення CJK (китайських, японських, корейських) символів.';
 
   @override
   String get license => 'Ліцензія';
@@ -297,10 +358,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get max => 'макс.';
 
   @override
-  String get maxRetryCount => 'Кількість повторних спроб підключення до сервера';
+  String get maxRetryCount =>
+      'Кількість повторних спроб підключення до сервера';
 
   @override
-  String get maxRetryCountEqual0 => 'Знову і знову буде намагатися повторно підключитися.';
+  String get maxRetryCountEqual0 =>
+      'Знову і знову буде намагатися повторно підключитися.';
 
   @override
   String get min => 'мін.';
@@ -312,13 +375,15 @@ class AppLocalizationsUk extends AppLocalizations {
   String get more => 'Більше';
 
   @override
-  String get moveOutServerFuncBtnsHelp => 'Включено: може відображатися під кожною карткою на вкладці Сервер. Вимкнено: може відображатися вгорі на сторінці деталей сервера.';
+  String get moveOutServerFuncBtnsHelp =>
+      'Включено: може відображатися під кожною карткою на вкладці Сервер. Вимкнено: може відображатися вгорі на сторінці деталей сервера.';
 
   @override
   String get ms => 'мс.';
 
   @override
-  String get needHomeDir => 'Якщо ви користувач Synology, [дивіться тут](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Користувачі інших систем повинні знайти інформацію про те, як створити домашній каталог.';
+  String get needHomeDir =>
+      'Якщо ви користувач Synology, [дивіться тут](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Користувачі інших систем повинні знайти інформацію про те, як створити домашній каталог.';
 
   @override
   String get needRestart => 'Необхідно перезапустити застосунок';
@@ -339,7 +404,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get noLineChartForCpu => 'Не використовувати лінійні діаграми для ЦП';
 
   @override
-  String get noPrivateKeyTip => 'Приватного ключа немає, можливо, він був видалений або сталася помилка конфігурації.';
+  String get noPrivateKeyTip =>
+      'Приватного ключа немає, можливо, він був видалений або сталася помилка конфігурації.';
 
   @override
   String get noPromptAgain => 'Більше не запитувати';
@@ -357,16 +423,19 @@ class AppLocalizationsUk extends AppLocalizations {
   String get onlyOneLine => 'Відображати лише в один рядок (прокрутка)';
 
   @override
-  String get onlyWhenCoreBiggerThan8 => 'Працює лише тоді, коли кількість ядер перевищує 8';
+  String get onlyWhenCoreBiggerThan8 =>
+      'Працює лише тоді, коли кількість ядер перевищує 8';
 
   @override
   String get openLastPath => 'Відкрити останній шлях';
 
   @override
-  String get openLastPathTip => 'Для різних серверів будуть збережені різні логи. Записується шлях при виході';
+  String get openLastPathTip =>
+      'Для різних серверів будуть збережені різні логи. Записується шлях при виході';
 
   @override
-  String get parseContainerStatsTip => 'Парсинг статусу зайнятості Docker є відносно повільним.';
+  String get parseContainerStatsTip =>
+      'Парсинг статусу зайнятості Docker є відносно повільним.';
 
   @override
   String percentOfSize(Object percent, Object size) {
@@ -383,7 +452,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get pingInputIP => 'Будь ласка, введіть цільовий IP / Домен.';
 
   @override
-  String get pingNoServer => 'Немає сервера для пінгування.\nБудь ласка, додайте сервер у вкладці `Сервер`.';
+  String get pingNoServer =>
+      'Немає сервера для пінгування.\nБудь ласка, додайте сервер у вкладці `Сервер`.';
 
   @override
   String get pkg => 'Пакет';
@@ -395,6 +465,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get port => 'Порт';
 
   @override
+  String get preferDiskAmount => 'Пріоритетно показувати ємність диска';
+
+  @override
   String get preview => 'Попередній перегляд';
 
   @override
@@ -404,19 +477,22 @@ class AppLocalizationsUk extends AppLocalizations {
   String get process => 'Процес';
 
   @override
+  String get prune => 'Обрізати';
+
+  @override
   String get pushToken => 'Надіслати токен';
 
   @override
-  String get pveIgnoreCertTip => 'Не рекомендується включати, будьте обережні з ризиками безпеки! Якщо ви використовуєте стандартний сертифікат від PVE, вам потрібно увімкнути цю опцію.';
+  String get pveIgnoreCertTip =>
+      'Не рекомендується включати, будьте обережні з ризиками безпеки! Якщо ви використовуєте стандартний сертифікат від PVE, вам потрібно увімкнути цю опцію.';
 
   @override
-  String get pveLoginFailed => 'Не вдалося увійти. Неможливо пройти аутентифікацію за допомогою імені користувача/пароля з конфігурації сервера для входу Linux PAM.';
+  String get pveLoginFailed =>
+      'Не вдалося увійти. Неможливо пройти аутентифікацію за допомогою імені користувача/пароля з конфігурації сервера для входу Linux PAM.';
 
   @override
-  String get pveVersionLow => 'Ця функція наразі перебуває на стадії тестування та випробувалася лише на PVE 8+. Будь ласка, використовуйте її з обережністю.';
-
-  @override
-  String get pwd => 'Пароль';
+  String get pveVersionLow =>
+      'Ця функція наразі перебуває на стадії тестування та випробувалася лише на PVE 8+. Будь ласка, використовуйте її з обережністю.';
 
   @override
   String get read => 'Читати';
@@ -428,7 +504,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get rememberPwdInMem => 'Запам\'ятати пароль у пам\'яті';
 
   @override
-  String get rememberPwdInMemTip => 'Використовується для контейнерів, призупинення тощо.';
+  String get rememberPwdInMemTip =>
+      'Використовується для контейнерів, призупинення тощо.';
 
   @override
   String get rememberWindowSize => 'Запам\'ятати розмір вікна';
@@ -488,10 +565,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get sftpDlPrepare => 'Підготовка до підключення...';
 
   @override
-  String get sftpEditorTip => 'Якщо порожньо, використовуйте вбудований редактор файлів програми. Якщо є значення, використовуйте редактор віддаленого сервера, наприклад, `vim` (рекомендується автоматично визначити відповідно до `EDITOR`).';
+  String get sftpEditorTip =>
+      'Якщо порожньо, використовуйте вбудований редактор файлів програми. Якщо є значення, використовуйте редактор віддаленого сервера, наприклад, `vim` (рекомендується автоматично визначити відповідно до `EDITOR`).';
 
   @override
-  String get sftpRmrDirSummary => 'Використовуйте `rm -r`, щоб видалити папку в SFTP.';
+  String get sftpRmrDirSummary =>
+      'Використовуйте `rm -r`, щоб видалити папку в SFTP.';
 
   @override
   String get sftpSSHConnected => 'SFTP підключено';
@@ -518,7 +597,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get specifyDev => 'Вказати пристрій';
 
   @override
-  String get specifyDevTip => 'Наприклад, статистика мережевого трафіку за замовчуванням є для всіх пристроїв. Ви можете вказати певний пристрій тут.';
+  String get specifyDevTip =>
+      'Наприклад, статистика мережевого трафіку за замовчуванням є для всіх пристроїв. Ви можете вказати певний пристрій тут.';
 
   @override
   String get speed => 'Швидкість';
@@ -529,7 +609,8 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
-  String get sshTermHelp => 'Коли термінал прокрутний, горизонтальне проведення вибирає текст. Натискання кнопки клавіатури вмикає/вимикає клавіатуру. Іконка файлу відкриває поточний шлях SFTP. Кнопка буфера обміну копіює вміст, коли текст вибрано, і вставляє вміст з буфера обміну в термінал, коли текст не вибрано і є вміст у буфері обміну. Іконка коду вставляє фрагменти коду в термінал і виконує їх.';
+  String get sshTermHelp =>
+      'Коли термінал прокрутний, горизонтальне проведення вибирає текст. Натискання кнопки клавіатури вмикає/вимикає клавіатуру. Іконка файлу відкриває поточний шлях SFTP. Кнопка буфера обміну копіює вміст, коли текст вибрано, і вставляє вміст з буфера обміну в термінал, коли текст не вибрано і є вміст у буфері обміну. Іконка коду вставляє фрагменти коду в термінал і виконує їх.';
 
   @override
   String sshTip(Object url) {
@@ -537,7 +618,8 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
-  String get sshVirtualKeyAutoOff => 'Автоматичне переключення віртуальних клавіш';
+  String get sshVirtualKeyAutoOff =>
+      'Автоматичне переключення віртуальних клавіш';
 
   @override
   String get start => 'Старт';
@@ -564,7 +646,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get suspend => 'Призупинити';
 
   @override
-  String get suspendTip => 'Функція призупинення потребує адміністративних прав та підтримки systemd.';
+  String get suspendTip =>
+      'Функція призупинення потребує адміністративних прав та підтримки systemd.';
 
   @override
   String switchTo(Object val) {
@@ -575,7 +658,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get sync => 'Синхронізація';
 
   @override
-  String get syncTip => 'Може знадобитися перезапуск, щоб деякі зміни набрали чинності.';
+  String get syncTip =>
+      'Може знадобитися перезапуск, щоб деякі зміни набрали чинності.';
 
   @override
   String get system => 'Система';
@@ -587,7 +671,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get temperature => 'Температура';
 
   @override
-  String get termFontSizeTip => 'Це налаштування вплине на розмір терміналу (ширину та висоту). Ви можете масштабувати на сторінці терміналу, щоб налаштувати розмір шрифту поточної сесії.';
+  String get termFontSizeTip =>
+      'Це налаштування вплине на розмір терміналу (ширину та висоту). Ви можете масштабувати на сторінці терміналу, щоб налаштувати розмір шрифту поточної сесії.';
 
   @override
   String get terminal => 'Термінал';
@@ -599,7 +684,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get textScaler => 'Масштабування тексту';
 
   @override
-  String get textScalerTip => '1.0 => 100% (оригінальний розмір), працює лише на частині шрифта сторінки сервера, не рекомендується змінювати.';
+  String get textScalerTip =>
+      '1.0 => 100% (оригінальний розмір), працює лише на частині шрифта сторінки сервера, не рекомендується змінювати.';
 
   @override
   String get theme => 'Тема';
@@ -632,7 +718,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get update => 'Оновити';
 
   @override
-  String get updateIntervalEqual0 => 'Ви встановили 0, автоматичне оновлення не відбудеться.\nНе можна розрахувати статус ЦП.';
+  String get updateIntervalEqual0 =>
+      'Ви встановили 0, автоматичне оновлення не відбудеться.\nНе можна розрахувати статус ЦП.';
 
   @override
   String get updateServerStatusInterval => 'Інтервал оновлення статусу сервера';
@@ -650,7 +737,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get useCdn => 'Використання CDN';
 
   @override
-  String get useCdnTip => 'Нереспонсивним користувачам рекомендується використовувати CDN. Чи хочете ви його використовувати?';
+  String get useCdnTip =>
+      'Нереспонсивним користувачам рекомендується використовувати CDN. Чи хочете ви його використовувати?';
 
   @override
   String get useNoPwd => 'Пароль не буде використовуватися';
@@ -668,7 +756,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get viewErr => 'Переглянути помилку';
 
   @override
-  String get virtKeyHelpClipboard => 'Копіювати в буфер обміну, якщо вибраний термінал не порожній, в іншому випадку вставити вміст буфера обміну в термінал.';
+  String get virtKeyHelpClipboard =>
+      'Копіювати в буфер обміну, якщо вибраний термінал не порожній, в іншому випадку вставити вміст буфера обміну в термінал.';
 
   @override
   String get virtKeyHelpIME => 'Увімкнути/вимкнути клавіатуру';
@@ -677,7 +766,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get virtKeyHelpSFTP => 'Відкрити поточний каталог у SFTP.';
 
   @override
-  String get waitConnection => 'Будь ласка, зачекайте, доки з\'єднання буде встановлено.';
+  String get waitConnection =>
+      'Будь ласка, зачекайте, доки з\'єднання буде встановлено.';
 
   @override
   String get wakeLock => 'Залишити активним';
@@ -692,14 +782,17 @@ class AppLocalizationsUk extends AppLocalizations {
   String get whenOpenApp => 'При відкритті програми';
 
   @override
-  String get wolTip => 'Після налаштування WOL (Wake-on-LAN), при кожному підключенні до сервера відправляється запит WOL.';
+  String get wolTip =>
+      'Після налаштування WOL (Wake-on-LAN), при кожному підключенні до сервера відправляється запит WOL.';
 
   @override
   String get write => 'Записати';
 
   @override
-  String get writeScriptFailTip => 'Запис у скрипт не вдався, можливо, через брак дозволів або каталог не існує.';
+  String get writeScriptFailTip =>
+      'Запис у скрипт не вдався, можливо, через брак дозволів або каталог не існує.';
 
   @override
-  String get writeScriptTip => 'Після підключення до сервера скрипт буде записано у ~/.config/server_box для моніторингу стану системи. Ви можете переглянути вміст скрипта.';
+  String get writeScriptTip =>
+      'Після підключення до сервера скрипт буде записано у `~/.config/server_box` \n | `/tmp/server_box` для моніторингу стану системи. Ви можете переглянути вміст скрипта.';
 }

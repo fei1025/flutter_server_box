@@ -8,24 +8,34 @@ import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/provider/pve.dart';
 import 'package:server_box/data/res/store.dart';
 import 'package:server_box/view/widget/percent_circle.dart';
-import 'package:server_box/view/widget/two_line_text.dart';
+
+final class PvePageArgs {
+  final Spi spi;
+
+  const PvePageArgs({required this.spi});
+}
 
 final class PvePage extends StatefulWidget {
-  final Spi spi;
+  final PvePageArgs args;
 
   const PvePage({
     super.key,
-    required this.spi,
+    required this.args,
   });
 
   @override
   State<PvePage> createState() => _PvePageState();
+
+  static const route = AppRouteArg<void, PvePageArgs>(
+    page: PvePage.new,
+    path: '/pve',
+  );
 }
 
 const _kHorziPadding = 11.0;
 
 final class _PvePageState extends State<PvePage> {
-  late final _pve = PveProvider(spi: widget.spi);
+  late final _pve = PveProvider(spi: widget.args.spi);
   late MediaQueryData _media;
   Timer? _timer;
 
@@ -53,7 +63,7 @@ final class _PvePageState extends State<PvePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: TwoLineText(up: 'PVE', down: widget.spi.name),
+        title: TwoLineText(up: 'PVE', down: widget.args.spi.name),
         actions: [
           ValBuilder(
             listenable: _pve.err,
@@ -236,8 +246,8 @@ final class _PvePageState extends State<PvePage> {
         ],
       ),
       UIs.height7,
-      AvgWidthRow(
-        width: _media.size.width,
+      AvgSize(
+        totalSize: _media.size.width,
         padding: _kHorziPadding * 2 + 26,
         children: [
           PercentCircle(percent: (item.cpu / item.maxcpu) * 100),
@@ -313,8 +323,8 @@ final class _PvePageState extends State<PvePage> {
         ],
       ),
       UIs.height7,
-      AvgWidthRow(
-        width: _media.size.width,
+      AvgSize(
+        totalSize: _media.size.width,
         padding: _kHorziPadding * 2 + 26,
         children: [
           PercentCircle(percent: (item.cpu / item.maxcpu) * 100),
@@ -416,7 +426,9 @@ final class _PvePageState extends State<PvePage> {
       ],
     );
   }
+}
 
+extension on _PvePageState {
   void _onCtrl(PveCtrlFunc func, String action, PveCtrlIface item) async {
     final sure = await context.showRoundDialog<bool>(
       title: libL10n.attention,
@@ -444,9 +456,7 @@ final class _PvePageState extends State<PvePage> {
   }
 
   void _initRefreshTimer() {
-    _timer = Timer.periodic(
-        Duration(seconds: Stores.setting.serverStatusUpdateInterval.fetch()),
-        (_) {
+    _timer = Timer.periodic(Duration(seconds: Stores.setting.serverStatusUpdateInterval.fetch()), (_) {
       if (mounted) {
         _pve.list();
       }

@@ -1,16 +1,17 @@
 import 'package:fl_lib/fl_lib.dart';
+import 'package:server_box/data/model/app/shell_func.dart';
+import 'package:server_box/data/model/server/amd.dart';
 import 'package:server_box/data/model/server/battery.dart';
+import 'package:server_box/data/model/server/conn.dart';
+import 'package:server_box/data/model/server/cpu.dart';
+import 'package:server_box/data/model/server/disk.dart';
+import 'package:server_box/data/model/server/disk_smart.dart';
+import 'package:server_box/data/model/server/memory.dart';
+import 'package:server_box/data/model/server/net_speed.dart';
 import 'package:server_box/data/model/server/nvdia.dart';
 import 'package:server_box/data/model/server/sensors.dart';
 import 'package:server_box/data/model/server/server.dart';
 import 'package:server_box/data/model/server/system.dart';
-
-import 'package:server_box/data/model/app/shell_func.dart';
-import 'package:server_box/data/model/server/cpu.dart';
-import 'package:server_box/data/model/server/disk.dart';
-import 'package:server_box/data/model/server/memory.dart';
-import 'package:server_box/data/model/server/net_speed.dart';
-import 'package:server_box/data/model/server/conn.dart';
 
 class ServerStatusUpdateReq {
   final ServerStatus ss;
@@ -38,7 +39,8 @@ Future<ServerStatus> getStatus(ServerStatusUpdateReq req) async {
 Future<ServerStatus> _getLinuxStatus(ServerStatusUpdateReq req) async {
   final segments = req.segments;
 
-  final time = int.tryParse(StatusCmdType.time.find(segments)) ??
+  final time =
+      int.tryParse(StatusCmdType.time.find(segments)) ??
       DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
   try {
@@ -49,9 +51,7 @@ Future<ServerStatus> _getLinuxStatus(ServerStatusUpdateReq req) async {
   }
 
   try {
-    final sys = _parseSysVer(
-      StatusCmdType.sys.find(segments),
-    );
+    final sys = _parseSysVer(StatusCmdType.sys.find(segments));
     if (sys != null) {
       req.ss.more[StatusCmdType.sys] = sys;
     }
@@ -132,7 +132,20 @@ Future<ServerStatus> _getLinuxStatus(ServerStatusUpdateReq req) async {
   }
 
   try {
+    final smarts = DiskSmart.parse(StatusCmdType.diskSmart.find(segments));
+    req.ss.diskSmart = smarts;
+  } catch (e, s) {
+    Loggers.app.warning(e, s);
+  }
+
+  try {
     req.ss.nvidia = NvidiaSmi.fromXml(StatusCmdType.nvidia.find(segments));
+  } catch (e, s) {
+    Loggers.app.warning(e, s);
+  }
+
+  try {
+    req.ss.amd = AmdSmi.fromJson(StatusCmdType.amd.find(segments));
   } catch (e, s) {
     Loggers.app.warning(e, s);
   }

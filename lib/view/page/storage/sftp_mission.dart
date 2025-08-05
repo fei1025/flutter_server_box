@@ -10,6 +10,11 @@ class SftpMissionPage extends StatefulWidget {
 
   @override
   State<SftpMissionPage> createState() => _SftpMissionPageState();
+
+  static const route = AppRouteNoArg(
+    page: SftpMissionPage.new,
+    path: '/sftp/mission',
+  );
 }
 
 class _SftpMissionPageState extends State<SftpMissionPage> {
@@ -123,7 +128,7 @@ class _SftpMissionPageState extends State<SftpMissionPage> {
           icon: const Icon(Icons.file_open),
         ),
         IconButton(
-          onPressed: () => Pfs.share(path: status.req.localPath),
+          onPressed: () => Pfs.sharePaths(paths: [status.req.localPath]),
           icon: const Icon(Icons.open_in_new),
         )
       ],

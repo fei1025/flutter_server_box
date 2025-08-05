@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:computer/computer.dart';
+import 'package:dartssh2/dartssh2.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:fl_lib/fl_lib.dart';
@@ -10,7 +11,6 @@ import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/data/model/app/error.dart';
 import 'package:server_box/data/model/server/pve.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
-import 'package:dartssh2/dartssh2.dart';
 
 typedef PveCtrlFunc = Future<bool> Function(String node, String id);
 
@@ -47,11 +47,11 @@ final class PveProvider extends ChangeNotifier {
         final client = HttpClient();
         client.connectionFactory = cf;
         if (_ignoreCert) {
-          client.badCertificateCallback = (_, __, ___) => true;
+          client.badCertificateCallback = (_, _, _) => true;
         }
         return client;
       },
-      validateCertificate: _ignoreCert ? (_, __, ___) => true : null,
+      validateCertificate: _ignoreCert ? (_, _, _) => true : null,
     );
 
   final data = ValueNotifier<PveRes?>(null);
