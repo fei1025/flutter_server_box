@@ -9,8 +9,10 @@ import 'package:server_box/core/extension/ssh_client.dart';
 import 'package:server_box/core/sync.dart';
 import 'package:server_box/core/utils/server.dart';
 import 'package:server_box/core/utils/ssh_auth.dart';
+import 'package:server_box/data/helper/system_detector.dart';
 import 'package:server_box/data/model/app/error.dart';
-import 'package:server_box/data/model/app/shell_func.dart';
+import 'package:server_box/data/model/app/scripts/script_consts.dart';
+import 'package:server_box/data/model/app/scripts/shell_func.dart';
 import 'package:server_box/data/model/server/server.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/model/server/server_status_update_req.dart';
@@ -18,6 +20,7 @@ import 'package:server_box/data/model/server/system.dart';
 import 'package:server_box/data/model/server/try_limiter.dart';
 import 'package:server_box/data/res/status.dart';
 import 'package:server_box/data/res/store.dart';
+import 'package:server_box/data/ssh/session_manager.dart';
 
 class ServerProvider extends Provider {
   const ServerProvider._();
@@ -31,6 +34,8 @@ class ServerProvider extends Provider {
   static Timer? _timer;
 
   static final _manualDisconnectedIds = <String>{};
+
+  static final _serverIdsUpdating = <String, Future<void>?>{};
 
   @override
   Future<void> load() async {
@@ -124,9 +129,33 @@ class ServerProvider extends Provider {
           return;
         }
 
-        return await _getData(s.spi);
+        // Check if already updating, and if so, wait for it to complete
+        final existingUpdate = _serverIdsUpdating[s.spi.id];
+        if (existingUpdate != null) {
+          // Already updating, wait for the existing update to complete
+          try {
+            await existingUpdate;
+          } catch (e) {
+            // Ignore errors from the existing update, we'll try our own
+          }
+          return;
+        }
+
+        // Start a new update operation
+        final updateFuture = _updateServer(s.spi);
+        _serverIdsUpdating[s.spi.id] = updateFuture;
+
+        try {
+          await updateFuture;
+        } finally {
+          _serverIdsUpdating.remove(s.spi.id);
+        }
       }),
     );
+  }
+
+  static Future<void> _updateServer(Spi spi) async {
+    await _getData(spi);
   }
 
   static Future<void> startAutoRefresh() async {
@@ -155,6 +184,10 @@ class ServerProvider extends Provider {
     for (final s in servers.values) {
       s.value.conn = ServerConn.disconnected;
       s.notify();
+
+      // Update SSH session status to disconnected
+      final sessionId = 'ssh_${s.value.spi.id}';
+      TermSessionManager.updateStatus(sessionId, TermSessionStatus.disconnected);
     }
     //TryLimiter.clear();
   }
@@ -181,6 +214,10 @@ class ServerProvider extends Provider {
     item.conn = ServerConn.disconnected;
     _manualDisconnectedIds.add(id);
     s.notify();
+
+    // Remove SSH session when server is manually closed
+    final sessionId = 'ssh_$id';
+    TermSessionManager.remove(sessionId);
   }
 
   static void addServer(Spi spi) {
@@ -201,10 +238,21 @@ class ServerProvider extends Provider {
     Stores.setting.serverOrder.put(serverOrder.value);
     Stores.server.delete(id);
     _updateTags();
+
+    // Remove SSH session when server is deleted
+    final sessionId = 'ssh_$id';
+    TermSessionManager.remove(sessionId);
+
     bakSync.sync(milliDelay: 1000);
   }
 
   static void deleteAll() {
+    // Remove all SSH sessions before clearing servers
+    for (final id in servers.keys) {
+      final sessionId = 'ssh_$id';
+      TermSessionManager.remove(sessionId);
+    }
+
     servers.clear();
     serverOrder.value.clear();
     serverOrder.notify();
@@ -225,6 +273,11 @@ class ServerProvider extends Provider {
         serverOrder.value.update(old.id, newSpi.id);
         Stores.setting.serverOrder.put(serverOrder.value);
         serverOrder.notify();
+
+        // Update SSH session ID when server ID changes
+        final oldSessionId = 'ssh_${old.id}';
+        TermSessionManager.remove(oldSessionId);
+        // Session will be re-added when reconnecting if necessary
       }
 
       // Only reconnect if neccessary
@@ -292,10 +345,25 @@ class ServerProvider extends Provider {
         } else {
           Loggers.app.info('Jump to ${spi.name} in $spentTime ms.');
         }
+
+        // Add SSH session to TermSessionManager
+        final sessionId = 'ssh_${spi.id}';
+        TermSessionManager.add(
+          id: sessionId,
+          spi: spi,
+          startTimeMs: time1.millisecondsSinceEpoch,
+          disconnect: () => _closeOneServer(spi.id),
+          status: TermSessionStatus.connecting,
+        );
+        TermSessionManager.setActive(sessionId, hasTerminal: false);
       } catch (e) {
         TryLimiter.inc(sid);
         sv.status.err = SSHErr(type: SSHErrType.connect, message: e.toString());
         _setServerState(s, ServerConn.failed);
+
+        // Remove SSH session on connection failure
+        final sessionId = 'ssh_${spi.id}';
+        TermSessionManager.remove(sessionId);
 
         /// In order to keep privacy, print [spi.name] instead of [spi.id]
         Loggers.app.warning('Connect to ${spi.name} failed', e);
@@ -304,14 +372,26 @@ class ServerProvider extends Provider {
 
       _setServerState(s, ServerConn.connected);
 
+      // Update SSH session status to connected
+      final sessionId = 'ssh_${spi.id}';
+      TermSessionManager.updateStatus(sessionId, TermSessionStatus.connected);
+
       try {
+        // Detect system type using helper
+        final detectedSystemType = await SystemDetector.detect(sv.client!, spi);
+        sv.status.system = detectedSystemType;
+
         final (_, writeScriptResult) = await sv.client!.exec((session) async {
-          final scriptRaw = ShellFunc.allScript(spi.custom?.cmds).uint8List;
+          final scriptRaw = ShellFuncManager.allScript(
+            spi.custom?.cmds,
+            systemType: detectedSystemType,
+            disabledCmdTypes: spi.disabledCmdTypes,
+          ).uint8List;
           session.stdin.add(scriptRaw);
           session.stdin.close();
-        }, entry: ShellFunc.getInstallShellCmd(spi.id));
-        if (writeScriptResult.isNotEmpty) {
-          ShellFunc.switchScriptDir(spi.id);
+        }, entry: ShellFuncManager.getInstallShellCmd(spi.id, systemType: detectedSystemType));
+        if (writeScriptResult.isNotEmpty && detectedSystemType != SystemType.windows) {
+          ShellFuncManager.switchScriptDir(spi.id, systemType: detectedSystemType);
           throw writeScriptResult;
         }
       } on SSHAuthAbortError catch (e) {
@@ -320,6 +400,10 @@ class ServerProvider extends Provider {
         sv.status.err = err;
         Loggers.app.warning(err);
         _setServerState(s, ServerConn.failed);
+
+        // Update SSH session status to disconnected
+        final sessionId = 'ssh_${spi.id}';
+        TermSessionManager.updateStatus(sessionId, TermSessionStatus.disconnected);
         return;
       } on SSHAuthFailError catch (e) {
         TryLimiter.inc(sid);
@@ -327,6 +411,10 @@ class ServerProvider extends Provider {
         sv.status.err = err;
         Loggers.app.warning(err);
         _setServerState(s, ServerConn.failed);
+
+        // Update SSH session status to disconnected
+        final sessionId = 'ssh_${spi.id}';
+        TermSessionManager.updateStatus(sessionId, TermSessionStatus.disconnected);
         return;
       } catch (e) {
         // If max try times < 2 and can't write script, this will stop the status getting and etc.
@@ -335,6 +423,10 @@ class ServerProvider extends Provider {
         sv.status.err = err;
         Loggers.app.warning(err);
         _setServerState(s, ServerConn.failed);
+
+        // Update SSH session status to disconnected
+        final sessionId = 'ssh_${spi.id}';
+        TermSessionManager.updateStatus(sessionId, TermSessionStatus.disconnected);
       }
     }
 
@@ -351,8 +443,9 @@ class ServerProvider extends Provider {
     String? raw;
 
     try {
-      raw = await sv.client?.run(ShellFunc.status.exec(spi.id)).string;
-      segments = raw?.split(ShellFunc.seperator).map((e) => e.trim()).toList();
+      raw = await sv.client?.run(ShellFunc.status.exec(spi.id, systemType: sv.status.system)).string;
+      //dprint('Get status from ${spi.name}:\n$raw');
+      segments = raw?.split(ScriptConstants.separator).map((e) => e.trim()).toList();
       if (raw == null || raw.isEmpty || segments == null || segments.isEmpty) {
         if (Stores.setting.keepStatusWhenErr.fetch()) {
           // Keep previous server status when err occurs
@@ -363,6 +456,10 @@ class ServerProvider extends Provider {
         TryLimiter.inc(sid);
         sv.status.err = SSHErr(type: SSHErrType.segements, message: 'Seperate segments failed, raw:\n$raw');
         _setServerState(s, ServerConn.failed);
+
+        // Update SSH session status to disconnected on segments error
+        final sessionId = 'ssh_${spi.id}';
+        TermSessionManager.updateStatus(sessionId, TermSessionStatus.disconnected);
         return;
       }
     } catch (e) {
@@ -370,34 +467,21 @@ class ServerProvider extends Provider {
       sv.status.err = SSHErr(type: SSHErrType.getStatus, message: e.toString());
       _setServerState(s, ServerConn.failed);
       Loggers.app.warning('Get status from ${spi.name} failed', e);
-      return;
-    }
 
-    final systemType = SystemType.parse(segments[0]);
-    final customCmdLen = spi.custom?.cmds?.length ?? 0;
-    if (!systemType.isSegmentsLenMatch(segments.length - customCmdLen)) {
-      TryLimiter.inc(sid);
-      if (raw.contains('Could not chdir to home directory /var/services/')) {
-        sv.status.err = SSHErr(type: SSHErrType.chdir, message: raw);
-        _setServerState(s, ServerConn.failed);
-        return;
-      }
-      final expected = systemType.segmentsLen;
-      final actual = segments.length;
-      sv.status.err = SSHErr(
-        type: SSHErrType.segements,
-        message: 'Segments: expect $expected, got $actual, raw:\n\n$raw',
-      );
-      _setServerState(s, ServerConn.failed);
+      // Update SSH session status to disconnected on status error
+      final sessionId = 'ssh_${spi.id}';
+      TermSessionManager.updateStatus(sessionId, TermSessionStatus.disconnected);
       return;
     }
-    sv.status.system = systemType;
 
     try {
+      // Parse script output into command-specific map
+      final parsedOutput = ScriptConstants.parseScriptOutput(raw);
+
       final req = ServerStatusUpdateReq(
         ss: sv.status,
-        segments: segments,
-        system: systemType,
+        parsedOutput: parsedOutput,
+        system: sv.status.system,
         customCmds: spi.custom?.cmds ?? {},
       );
       sv.status = await Computer.shared.start(getStatus, req, taskName: 'StatusUpdateReq<${sv.id}>');
@@ -406,6 +490,10 @@ class ServerProvider extends Provider {
       sv.status.err = SSHErr(type: SSHErrType.getStatus, message: 'Parse failed: $e\n\n$raw');
       _setServerState(s, ServerConn.failed);
       Loggers.app.warning('Server status', e, trace);
+
+      // Update SSH session status to disconnected on parse error
+      final sessionId = 'ssh_${spi.id}';
+      TermSessionManager.updateStatus(sessionId, TermSessionStatus.disconnected);
       return;
     }
 

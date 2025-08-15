@@ -11,7 +11,8 @@ import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/core/extension/ssh_client.dart';
 import 'package:server_box/core/route.dart';
 import 'package:server_box/data/model/app/net_view.dart';
-import 'package:server_box/data/model/app/shell_func.dart';
+import 'package:server_box/data/model/app/scripts/cmd_types.dart';
+import 'package:server_box/data/model/app/scripts/shell_func.dart';
 import 'package:server_box/data/model/server/server.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/model/server/try_limiter.dart';
@@ -319,8 +320,7 @@ class _ServerPageState extends State<ServerPage> with AutomaticKeepAliveClientMi
               ],
             ),
             UIs.height13,
-            if (Stores.setting.moveServerFuncs.fetch())
-              SizedBox(height: 27, child: ServerFuncBtns(spi: spi)),
+            if (Stores.setting.moveServerFuncs.fetch()) SizedBox(height: 27, child: ServerFuncBtns(spi: spi)),
           ],
         );
       },

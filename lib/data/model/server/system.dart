@@ -1,32 +1,52 @@
-import 'package:server_box/data/model/app/shell_func.dart';
+import 'package:fl_lib/fl_lib.dart';
 
 enum SystemType {
-  linux._(linuxSign),
-  bsd._(bsdSign),
-  ;
+  linux(linuxSign),
+  bsd(bsdSign),
+  windows(windowsSign);
 
-  final String value;
+  final String? value;
 
-  const SystemType._(this.value);
+  const SystemType([this.value]);
 
   static const linuxSign = '__linux';
   static const bsdSign = '__bsd';
+  static const windowsSign = '__windows';
 
+  /// Used for parsing system types from shell output.
+  ///
+  /// This method looks for specific system signatures in the shell output
+  /// and returns the corresponding SystemType. If no signature is found,
+  /// it defaults to Linux but logs the detection failure for debugging.
   static SystemType parse(String value) {
+    // Log the raw value for debugging purposes (truncated to avoid spam)
+    final truncatedValue = value.length > 100 ? '${value.substring(0, 100)}...' : value;
+
+    if (value.contains(windowsSign)) {
+      Loggers.app.info('System detected as Windows from signature in: $truncatedValue');
+      return SystemType.windows;
+    }
     if (value.contains(bsdSign)) {
+      Loggers.app.info('System detected as BSD from signature in: $truncatedValue');
       return SystemType.bsd;
     }
-    return SystemType.linux;
-  }
 
-  bool isSegmentsLenMatch(int len) => len == segmentsLen;
-
-  int get segmentsLen {
-    switch (this) {
-      case SystemType.linux:
-        return StatusCmdType.values.length;
-      case SystemType.bsd:
-        return BSDStatusCmdType.values.length;
+    // Log when falling back to Linux detection
+    if (value.trim().isEmpty) {
+      Loggers.app.warning(
+        'System detection received empty input, defaulting to Linux. '
+        'This may indicate a script execution issue.',
+      );
+    } else if (!value.contains(linuxSign)) {
+      Loggers.app.warning(
+        'System detection could not find any known signatures (Windows: $windowsSign, '
+        'BSD: $bsdSign, Linux: $linuxSign) in output: "$truncatedValue". '
+        'Defaulting to Linux, but this may cause incorrect parsing.',
+      );
+    } else {
+      Loggers.app.info('System detected as Linux from signature in: $truncatedValue');
     }
+
+    return SystemType.linux;
   }
 }

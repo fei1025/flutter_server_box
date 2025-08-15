@@ -9,15 +9,9 @@ import 'package:server_box/view/page/ssh/page/page.dart';
 final class SystemdPage extends StatefulWidget {
   final SpiRequiredArgs args;
 
-  const SystemdPage({
-    super.key,
-    required this.args,
-  });
+  const SystemdPage({super.key, required this.args});
 
-  static const route = AppRouteArg<void, SpiRequiredArgs>(
-    page: SystemdPage.new,
-    path: '/systemd',
-  );
+  static const route = AppRouteArg<void, SpiRequiredArgs>(page: SystemdPage.new, path: '/systemd');
 
   @override
   State<SystemdPage> createState() => _SystemdPageState();
@@ -37,9 +31,7 @@ final class _SystemdPageState extends State<SystemdPage> {
     return Scaffold(
       appBar: CustomAppBar(
         title: const Text('Systemd'),
-        actions: isDesktop
-            ? [Btn.icon(icon: const Icon(Icons.refresh), onTap: _pro.getUnits)]
-            : null,
+        actions: isDesktop ? [Btn.icon(icon: const Icon(Icons.refresh), onTap: _pro.getUnits)] : null,
       ),
       body: RefreshIndicator(onRefresh: _pro.getUnits, child: _buildBody()),
     );
@@ -49,52 +41,64 @@ final class _SystemdPageState extends State<SystemdPage> {
     return CustomScrollView(
       slivers: <Widget>[
         SliverToBoxAdapter(
-          child: _pro.isBusy.listenVal(
-            (isBusy) => AnimatedContainer(
-              duration: Durations.medium1,
-              curve: Curves.fastEaseInToSlowEaseOut,
-              height: isBusy ? SizedLoading.medium.size : 0,
-              child: isBusy
-                  ? SizedLoading.medium
-                  : const SizedBox.shrink(),
-            ),
+          child: Column(
+            children: [
+              _buildScopeFilterChips(),
+              _pro.isBusy.listenVal(
+                (isBusy) => AnimatedContainer(
+                  duration: Durations.medium1,
+                  curve: Curves.fastEaseInToSlowEaseOut,
+                  height: isBusy ? SizedLoading.medium.size : 0,
+                  width: isBusy ? SizedLoading.medium.size : 0,
+                  child: isBusy ? SizedLoading.medium : const SizedBox.shrink(),
+                ),
+              ),
+            ],
           ),
         ),
-        _buildUnitList(_pro.units),
+        _buildUnitList(),
       ],
     );
   }
 
-  Widget _buildUnitList(VNode<List<SystemdUnit>> units) {
-    return units.listenVal(
-      (units) {
-        if (units.isEmpty) {
-          return SliverToBoxAdapter(
-            child:
-                CenterGreyTitle(libL10n.empty).paddingSymmetric(horizontal: 13),
+  Widget _buildScopeFilterChips() {
+    return _pro.scopeFilter.listenVal((currentFilter) {
+      return Wrap(
+        spacing: 8,
+        children: SystemdScopeFilter.values.map((filter) {
+          final isSelected = filter == currentFilter;
+          return FilterChip(
+            selected: isSelected,
+            label: Text(filter.displayName),
+            onSelected: (_) => _pro.scopeFilter.value = filter,
           );
+        }).toList(),
+      ).paddingSymmetric(horizontal: 13, vertical: 8);
+    });
+  }
+
+  Widget _buildUnitList() {
+    return _pro.units.listenVal((allUnits) {
+      return _pro.scopeFilter.listenVal((filter) {
+        final filteredUnits = _pro.filteredUnits;
+        if (filteredUnits.isEmpty) {
+          return SliverToBoxAdapter(child: CenterGreyTitle(libL10n.empty).paddingSymmetric(horizontal: 13));
         }
         return SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              final unit = units[index];
-              return ListTile(
-                leading: _buildScopeTag(unit.scope),
-                title: unit.description != null
-                    ? TipText(unit.name, unit.description!)
-                    : Text(unit.name),
-                subtitle: Wrap(children: [
-                  _buildStateTag(unit.state),
-                  _buildTypeTag(unit.type),
-                ]).paddingOnly(top: 7),
-                trailing: _buildUnitFuncs(unit),
-              ).cardx.paddingSymmetric(horizontal: 13);
-            },
-            childCount: units.length,
-          ),
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final unit = filteredUnits[index];
+            return ListTile(
+              leading: _buildScopeTag(unit.scope),
+              title: unit.description != null ? TipText(unit.name, unit.description!) : Text(unit.name),
+              subtitle: Wrap(
+                children: [_buildStateTag(unit.state), _buildTypeTag(unit.type)],
+              ).paddingOnly(top: 7),
+              trailing: _buildUnitFuncs(unit),
+            ).cardx.paddingSymmetric(horizontal: 13);
+          }, childCount: filteredUnits.length),
         );
-      },
-    );
+      });
+    });
   }
 
   Widget _buildUnitFuncs(SystemdUnit unit) {
@@ -128,11 +132,7 @@ final class _SystemdPageState extends State<SystemdPage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Icon(func.icon, size: 19),
-          const SizedBox(width: 10),
-          Text(func.name.capitalize),
-        ],
+        children: [Icon(func.icon, size: 19), const SizedBox(width: 10), Text(func.name.capitalize)],
       ),
     );
   }
@@ -155,8 +155,7 @@ final class _SystemdPageState extends State<SystemdPage> {
         color: color?.withValues(alpha: 0.7) ?? UIs.halfAlpha,
         borderRadius: BorderRadius.circular(5),
       ),
-      child: Text(tag, style: UIs.text11)
-          .paddingSymmetric(horizontal: 5, vertical: 1),
+      child: Text(tag, style: UIs.text11).paddingSymmetric(horizontal: 5, vertical: 1),
     ).paddingOnly(right: noPad ? 0 : 5);
   }
 }

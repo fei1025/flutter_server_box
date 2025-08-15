@@ -40,17 +40,13 @@ class MyApp extends StatelessWidget {
       light: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: UIs.colorSeed,
-        appBarTheme: AppBarTheme(
-          scrolledUnderElevation: 0.0,
-        ),
+        appBarTheme: AppBarTheme(scrolledUnderElevation: 0.0),
       ),
       dark: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
         colorSchemeSeed: UIs.colorSeed,
-        appBarTheme: AppBarTheme(
-          scrolledUnderElevation: 0.0,
-        ),
+        appBarTheme: AppBarTheme(scrolledUnderElevation: 0.0),
       ),
     );
   }
@@ -58,15 +54,8 @@ class MyApp extends StatelessWidget {
   Widget _buildDynamicColor(BuildContext context) {
     return DynamicColorBuilder(
       builder: (light, dark) {
-        final lightTheme = ThemeData(
-          useMaterial3: true,
-          colorScheme: light,
-        );
-        final darkTheme = ThemeData(
-          useMaterial3: true,
-          brightness: Brightness.dark,
-          colorScheme: dark,
-        );
+        final lightTheme = ThemeData(useMaterial3: true, colorScheme: light);
+        final darkTheme = ThemeData(useMaterial3: true, brightness: Brightness.dark, colorScheme: dark);
         if (context.isDark && dark != null) {
           UIs.primaryColor = dark.primary;
         } else if (!context.isDark && light != null) {
@@ -78,11 +67,7 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  Widget _buildApp(
-    BuildContext ctx, {
-    required ThemeData light,
-    required ThemeData dark,
-  }) {
+  Widget _buildApp(BuildContext ctx, {required ThemeData light, required ThemeData dark}) {
     final tMode = Stores.setting.themeMode.fetch();
     // Issue #57
     final themeMode = switch (tMode) {
@@ -97,16 +82,13 @@ class MyApp extends StatelessWidget {
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child ?? UIs.placeholder,
         breakpoints: const [
-          Breakpoint(start: 0, end: 450, name: MOBILE),
-          Breakpoint(start: 451, end: 800, name: TABLET),
-          Breakpoint(start: 801, end: 1920, name: DESKTOP),
+          Breakpoint(start: 0, end: 600, name: MOBILE),
+          Breakpoint(start: 600, end: 1199, name: TABLET),
+          Breakpoint(start: 1199, end: 3840, name: DESKTOP),
         ],
       ),
       locale: locale,
-      localizationsDelegates: const [
-        LibLocalizations.delegate,
-        ...AppLocalizations.localizationsDelegates,
-      ],
+      localizationsDelegates: const [LibLocalizations.delegate, ...AppLocalizations.localizationsDelegates],
       supportedLocales: AppLocalizations.supportedLocales,
       localeListResolutionCallback: LocaleUtil.resolve,
       navigatorObservers: [AppRouteObserver.instance],
@@ -114,24 +96,26 @@ class MyApp extends StatelessWidget {
       themeMode: themeMode,
       theme: light.fixWindowsFont,
       darkTheme: (tMode < 3 ? dark : dark.toAmoled).fixWindowsFont,
-      home: Builder(
-        builder: (context) {
+      home: FutureBuilder<List<IntroPageBuilder>>(
+        future: _IntroPage.builders,
+        builder: (context, snapshot) {
           context.setLibL10n();
           final appL10n = AppLocalizations.of(context);
           if (appL10n != null) l10n = appL10n;
 
           Widget child;
-          final intros = _IntroPage.builders;
-          if (intros.isNotEmpty) {
-            child = _IntroPage(intros);
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            child = const Scaffold(body: Center(child: CircularProgressIndicator()));
+          } else {
+            final intros = snapshot.data ?? [];
+            if (intros.isNotEmpty) {
+              child = _IntroPage(intros);
+            } else {
+              child = const HomePage();
+            }
           }
 
-          child = const HomePage();
-
-          return VirtualWindowFrame(
-            title: BuildData.name,
-            child: child,
-          );
+          return VirtualWindowFrame(title: BuildData.name, child: child);
         },
       ),
     );

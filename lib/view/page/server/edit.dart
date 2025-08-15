@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/core/route.dart';
+import 'package:server_box/data/model/app/scripts/cmd_types.dart';
 import 'package:server_box/data/model/server/custom.dart';
 import 'package:server_box/data/model/server/server.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
+import 'package:server_box/data/model/server/system.dart';
 import 'package:server_box/data/model/server/wol_cfg.dart';
 import 'package:server_box/data/provider/private_key.dart';
 import 'package:server_box/data/provider/server.dart';
@@ -59,6 +61,8 @@ class _ServerEditPageState extends State<ServerEditPage> with AfterLayoutMixin {
   final _env = <String, String>{}.vn;
   final _customCmds = <String, String>{}.vn;
   final _tags = <String>{}.vn;
+  final _systemType = ValueNotifier<SystemType?>(null);
+  final _disabledCmdTypes = <String>{}.vn;
 
   @override
   void dispose() {
@@ -91,6 +95,8 @@ class _ServerEditPageState extends State<ServerEditPage> with AfterLayoutMixin {
     _env.dispose();
     _customCmds.dispose();
     _tags.dispose();
+    _systemType.dispose();
+    _disabledCmdTypes.dispose();
   }
 
   @override
@@ -174,6 +180,7 @@ class _ServerEditPageState extends State<ServerEditPage> with AfterLayoutMixin {
         ),
       ),
       _buildAuth(),
+      _buildSystemType(),
       _buildJumpServer(),
       _buildMore(),
     ];
@@ -285,6 +292,7 @@ class _ServerEditPageState extends State<ServerEditPage> with AfterLayoutMixin {
         _buildEnvs(),
         _buildPVEs(),
         _buildCustomCmds(),
+        _buildDisabledCmdTypes(),
         _buildCustomDev(),
         _buildWOLs(),
       ],
@@ -329,6 +337,26 @@ class _ServerEditPageState extends State<ServerEditPage> with AfterLayoutMixin {
         ),
       ],
     );
+  }
+
+  Widget _buildSystemType() {
+    return _systemType.listenVal((val) {
+      return ListTile(
+        leading: Icon(MingCute.laptop_2_line),
+        title: Text(l10n.system),
+        trailing: PopupMenu<SystemType?>(
+          initialValue: val,
+          items: [
+            PopupMenuItem(value: null, child: Text(libL10n.auto)),
+            PopupMenuItem(value: SystemType.linux, child: Text('Linux')),
+            PopupMenuItem(value: SystemType.bsd, child: Text('BSD')),
+            PopupMenuItem(value: SystemType.windows, child: Text('Windows')),
+          ],
+          onSelected: (value) => _systemType.value = value,
+          child: Text(val?.name ?? libL10n.auto, style: TextStyle(color: val == null ? Colors.grey : null)),
+        ),
+      ).cardx;
+    });
   }
 
   Widget _buildAltUrl() {
@@ -393,6 +421,24 @@ class _ServerEditPageState extends State<ServerEditPage> with AfterLayoutMixin {
           trailing: const Icon(Icons.open_in_new, size: 17),
           onTap: l10n.customCmdDocUrl.launchUrl,
         ).cardx,
+      ],
+    );
+  }
+
+  Widget _buildDisabledCmdTypes() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CenterGreyTitle('${libL10n.disabled} ${l10n.cmd}'),
+        _disabledCmdTypes.listenVal((disabled) {
+          return ListTile(
+            leading: const Icon(Icons.disabled_by_default),
+            title: Text('${libL10n.disabled} ${l10n.cmd}'),
+            subtitle: disabled.isEmpty ? null : Text(disabled.join(', '), style: UIs.textGrey),
+            trailing: const Icon(Icons.keyboard_arrow_right),
+            onTap: _onTapDisabledCmdTypes,
+          );
+        }).cardx,
       ],
     );
   }
@@ -550,6 +596,61 @@ extension on _ServerEditPageState {
     _customCmds.value = res;
   }
 
+  void _onTapDisabledCmdTypes() async {
+    final allCmdTypes = ShellCmdType.all;
+
+    // [TimeSeq] depends on the `time` cmd type, so it should be removed from the list
+    allCmdTypes.remove(StatusCmdType.time);
+
+    await _showCmdTypesDialog(allCmdTypes);
+  }
+
+  Future<void> _showCmdTypesDialog(Set<ShellCmdType> allCmdTypes) {
+    return context.showRoundDialog(
+      title: '${libL10n.disabled} ${l10n.cmd}',
+      child: SizedBox(
+        width: 270,
+        child: _disabledCmdTypes.listenVal((disabled) {
+          return ListView.builder(
+            itemCount: allCmdTypes.length,
+            itemExtent: 50,
+            itemBuilder: (context, index) {
+              final cmdType = allCmdTypes.elementAtOrNull(index);
+              if (cmdType == null) return UIs.placeholder;
+              final display = cmdType.displayName;
+              return ListTile(
+                leading: Icon(cmdType.sysType.icon, size: 20),
+                title: Text(cmdType.name, style: const TextStyle(fontSize: 16)),
+                trailing: Checkbox(
+                  value: disabled.contains(display),
+                  onChanged: (value) {
+                    if (value == null) return;
+                    if (value) {
+                      _disabledCmdTypes.value.add(display);
+                    } else {
+                      _disabledCmdTypes.value.remove(display);
+                    }
+                    _disabledCmdTypes.notify();
+                  },
+                ),
+                onTap: () {
+                  final isDisabled = disabled.contains(display);
+                  if (isDisabled) {
+                    _disabledCmdTypes.value.remove(display);
+                  } else {
+                    _disabledCmdTypes.value.add(display);
+                  }
+                  _disabledCmdTypes.notify();
+                },
+              );
+            },
+          );
+        }),
+      ),
+      actions: Btnx.oks,
+    );
+  }
+
   void _onSave() async {
     if (_ipController.text.isEmpty) {
       context.showSnackBar('${libL10n.empty} ${l10n.host}');
@@ -614,6 +715,8 @@ extension on _ServerEditPageState {
       wolCfg: wol,
       envs: _env.value.isEmpty ? null : _env.value,
       id: widget.args?.spi.id ?? ShortId.generate(),
+      customSystemType: _systemType.value,
+      disabledCmdTypes: _disabledCmdTypes.value.isEmpty ? null : _disabledCmdTypes.value.toList(),
     );
 
     if (this.spi == null) {
@@ -668,5 +771,12 @@ extension on _ServerEditPageState {
 
     _netDevCtrl.text = spi.custom?.netDev ?? '';
     _scriptDirCtrl.text = spi.custom?.scriptDir ?? '';
+
+    _systemType.value = spi.customSystemType;
+
+    final disabledCmdTypes = spi.disabledCmdTypes?.toSet() ?? {};
+    final allAvailableCmdTypes = ShellCmdType.all.map((e) => e.displayName);
+    disabledCmdTypes.removeWhere((e) => !allAvailableCmdTypes.contains(e));
+    _disabledCmdTypes.value = disabledCmdTypes;
   }
 }
